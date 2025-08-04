@@ -3,6 +3,13 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from pydantic import BaseModel, ValidationError
 from core.db import DatabaseConfig
+from core.exceptions import (
+    ServiceException,
+    ValidationException,
+    NotFoundException,
+    DuplicateException,
+    PermissionException
+)
 from dto.base_dto import (
     PaginationDTO,
     PaginatedResponseDTO,
@@ -13,38 +20,6 @@ from dto.base_dto import (
 
 T = TypeVar('T', bound=BaseModel)
 M = TypeVar('M')  # Model type
-
-class ServiceException(Exception):
-    """Base exception untuk services"""
-    def __init__(self, message: str, code: str = "SERVICE_ERROR", status_code: int = 500):
-        self.message = message
-        self.code = code
-        self.status_code = status_code
-        super().__init__(self.message)
-
-class ValidationException(ServiceException):
-    """Exception untuk validation errors"""
-    def __init__(self, errors: List[Dict[str, Any]]):
-        self.errors = errors
-        super().__init__("Validation failed", "VALIDATION_ERROR", 400)
-
-class NotFoundException(ServiceException):
-    """Exception untuk resource not found"""
-    def __init__(self, resource: str, identifier: str):
-        message = f"{resource} dengan ID {identifier} tidak ditemukan"
-        super().__init__(message, "NOT_FOUND", 404)
-
-class DuplicateException(ServiceException):
-    """Exception untuk duplicate resource"""
-    def __init__(self, resource: str, field: str, value: str):
-        message = f"{resource} dengan {field} '{value}' sudah ada"
-        super().__init__(message, "DUPLICATE_ERROR", 409)
-
-class PermissionException(ServiceException):
-    """Exception untuk permission denied"""
-    def __init__(self, action: str, resource: str):
-        message = f"Tidak memiliki izin untuk {action} {resource}"
-        super().__init__(message, "PERMISSION_DENIED", 403)
 
 class BaseService(Generic[T, M], ABC):
     """Base service class dengan fungsionalitas umum"""
@@ -91,8 +66,8 @@ class BaseService(Generic[T, M], ABC):
         """Membuat response error"""
         return ErrorResponseDTO(
             success=False,
-            message=message,
-            code=code,
+            error=message,
+            error_code=code,
             details=details or {},
             timestamp=datetime.now()
         )
@@ -104,9 +79,9 @@ class BaseService(Generic[T, M], ABC):
         """Membuat response validation error"""
         return ValidationErrorResponseDTO(
             success=False,
-            message="Validation failed",
-            code="VALIDATION_ERROR",
-            errors=errors,
+            error="Validation failed",
+            error_code="VALIDATION_ERROR",
+            validation_errors=errors,
             timestamp=datetime.now()
         )
     
@@ -121,8 +96,6 @@ class BaseService(Generic[T, M], ABC):
         total_pages = (total + pagination.limit - 1) // pagination.limit
         
         return PaginatedResponseDTO(
-            success=True,
-            message=message,
             data=data,
             pagination=PaginationDTO(
                 page=pagination.page,
@@ -131,8 +104,7 @@ class BaseService(Generic[T, M], ABC):
                 total_pages=total_pages,
                 has_next=pagination.page < total_pages,
                 has_prev=pagination.page > 1
-            ),
-            timestamp=datetime.now()
+            )
         )
     
     def handle_service_exception(self, e: ServiceException) -> ErrorResponseDTO:

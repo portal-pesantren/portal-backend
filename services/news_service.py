@@ -19,7 +19,8 @@ from dto.news_dto import (
     NewsSEODTO
 )
 from dto.base_dto import PaginationDTO, PaginatedResponseDTO, SuccessResponseDTO
-from .base_service import BaseService, NotFoundException, DuplicateException, ValidationException, PermissionException
+from .base_service import BaseService
+from core.exceptions import NotFoundException, DuplicateException, ValidationException, PermissionException
 
 class NewsService(BaseService[NewsCreateDTO, NewsModel]):
     """Service untuk mengelola berita pesantren"""

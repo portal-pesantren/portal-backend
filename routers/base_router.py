@@ -2,7 +2,7 @@ from typing import Dict, Any, Optional, Callable
 from functools import wraps
 import json
 from datetime import datetime
-from services.base_service import ServiceException, ValidationException, NotFoundException, PermissionException
+from core.exceptions import ServiceException, ValidationException, NotFoundException, PermissionException
 from dto.base_dto import PaginationDTO, ErrorResponseDTO
 
 class BaseRouter:

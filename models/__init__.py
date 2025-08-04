@@ -5,8 +5,6 @@ from .review import ReviewModel
 from .application import ApplicationModel
 from .news import NewsModel
 from .consultation import ConsultationModel
-from .facility import FacilityModel
-from .program import ProgramModel
 
 __all__ = [
     'BaseModel',
@@ -16,6 +14,4 @@ __all__ = [
     'ApplicationModel',
     'NewsModel',
     'ConsultationModel',
-    'FacilityModel',
-    'ProgramModel'
 ]

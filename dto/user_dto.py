@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, validator, EmailStr
+from pydantic import BaseModel, Field, field_validator, field_validator, EmailStr
 from datetime import datetime
 from .base_dto import BaseResponseDTO, SearchDTO, FilterDTO
 
@@ -16,20 +16,20 @@ class UserCreateDTO(BaseModel):
     gender: Optional[str] = Field(None, description="Jenis kelamin")
     occupation: Optional[str] = Field(None, description="Pekerjaan")
     
-    @validator('role')
+    @field_validator('role')
     def validate_role(cls, v):
         valid_roles = ['parent', 'admin', 'pesantren_admin', 'super_admin']
         if v not in valid_roles:
             raise ValueError(f'Role {v} tidak valid. Role yang valid: {", ".join(valid_roles)}')
         return v
     
-    @validator('gender')
+    @field_validator('gender')
     def validate_gender(cls, v):
         if v and v not in ['male', 'female']:
             raise ValueError('Gender harus male atau female')
         return v
     
-    @validator('phone')
+    @field_validator('phone')
     def validate_phone(cls, v):
         # Validasi format nomor telepon Indonesia
         import re
@@ -49,13 +49,13 @@ class UserUpdateDTO(BaseModel):
     occupation: Optional[str] = Field(None, description="Pekerjaan")
     is_active: Optional[bool] = Field(None, description="Status aktif")
     
-    @validator('gender')
+    @field_validator('gender')
     def validate_gender(cls, v):
         if v and v not in ['male', 'female']:
             raise ValueError('Gender harus male atau female')
         return v
     
-    @validator('phone')
+    @field_validator('phone')
     def validate_phone(cls, v):
         if v:
             import re
@@ -70,7 +70,7 @@ class UserPasswordUpdateDTO(BaseModel):
     new_password: str = Field(..., min_length=8, description="Password baru")
     confirm_password: str = Field(..., description="Konfirmasi password baru")
     
-    @validator('confirm_password')
+    @field_validator('confirm_password')
     def validate_password_match(cls, v, values):
         if 'new_password' in values and v != values['new_password']:
             raise ValueError('Konfirmasi password tidak cocok')
@@ -158,13 +158,13 @@ class UserRegistrationDTO(UserCreateDTO):
     confirm_password: str = Field(..., description="Konfirmasi password")
     terms_accepted: bool = Field(..., description="Menyetujui syarat dan ketentuan")
     
-    @validator('confirm_password')
+    @field_validator('confirm_password')
     def validate_password_match(cls, v, values):
         if 'password' in values and v != values['password']:
             raise ValueError('Konfirmasi password tidak cocok')
         return v
     
-    @validator('terms_accepted')
+    @field_validator('terms_accepted')
     def validate_terms(cls, v):
         if not v:
             raise ValueError('Harus menyetujui syarat dan ketentuan')
@@ -175,7 +175,7 @@ class UserVerificationDTO(BaseModel):
     verification_code: str = Field(..., min_length=6, max_length=6, description="Kode verifikasi")
     verification_type: str = Field(..., description="Tipe verifikasi")
     
-    @validator('verification_type')
+    @field_validator('verification_type')
     def validate_verification_type(cls, v):
         valid_types = ['email', 'phone', 'password_reset']
         if v not in valid_types:
@@ -192,7 +192,7 @@ class UserResetPasswordDTO(BaseModel):
     new_password: str = Field(..., min_length=8, description="Password baru")
     confirm_password: str = Field(..., description="Konfirmasi password baru")
     
-    @validator('confirm_password')
+    @field_validator('confirm_password')
     def validate_password_match(cls, v, values):
         if 'new_password' in values and v != values['new_password']:
             raise ValueError('Konfirmasi password tidak cocok')

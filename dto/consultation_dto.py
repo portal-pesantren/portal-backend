@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field,  field_validator
 from datetime import datetime
 from .base_dto import BaseResponseDTO, SearchDTO, FilterDTO
 
@@ -15,7 +15,7 @@ class ConsultationCreateDTO(BaseModel):
     student_info: Optional[Dict[str, Any]] = Field(None, description="Informasi siswa")
     attachments: List[str] = Field(default=[], description="URL lampiran")
     
-    @validator('category')
+    @field_validator('category')
     def validate_category(cls, v):
         valid_categories = [
             'pendaftaran', 'biaya', 'program', 'fasilitas', 'kurikulum',
@@ -25,21 +25,21 @@ class ConsultationCreateDTO(BaseModel):
             raise ValueError(f'Kategori {v} tidak valid')
         return v
     
-    @validator('priority')
+    @field_validator('priority')
     def validate_priority(cls, v):
         valid_priorities = ['low', 'normal', 'high', 'urgent']
         if v not in valid_priorities:
             raise ValueError(f'Prioritas {v} tidak valid')
         return v
     
-    @validator('contact_preference')
+    @field_validator('contact_preference')
     def validate_contact_preference(cls, v):
         valid_preferences = ['email', 'phone', 'whatsapp', 'video_call']
         if v not in valid_preferences:
             raise ValueError(f'Preferensi kontak {v} tidak valid')
         return v
     
-    @validator('attachments')
+    @field_validator('attachments')
     def validate_attachments(cls, v):
         if len(v) > 5:
             raise ValueError('Maksimal 5 lampiran per konsultasi')
@@ -59,7 +59,7 @@ class ConsultationUpdateDTO(BaseModel):
     attachments: Optional[List[str]] = Field(None, description="URL lampiran")
     admin_notes: Optional[str] = Field(None, description="Catatan admin")
     
-    @validator('category')
+    @field_validator('category')
     def validate_category(cls, v):
         if v:
             valid_categories = [
@@ -70,7 +70,7 @@ class ConsultationUpdateDTO(BaseModel):
                 raise ValueError(f'Kategori {v} tidak valid')
         return v
     
-    @validator('priority')
+    @field_validator('priority')
     def validate_priority(cls, v):
         if v:
             valid_priorities = ['low', 'normal', 'high', 'urgent']
@@ -78,7 +78,7 @@ class ConsultationUpdateDTO(BaseModel):
                 raise ValueError(f'Prioritas {v} tidak valid')
         return v
     
-    @validator('status')
+    @field_validator('status')
     def validate_status(cls, v):
         if v:
             valid_statuses = ['open', 'in_progress', 'waiting_response', 'resolved', 'closed']
@@ -92,7 +92,7 @@ class ConsultationResponseCreateDTO(BaseModel):
     attachments: List[str] = Field(default=[], description="URL lampiran")
     is_internal: bool = Field(False, description="Catatan internal")
     
-    @validator('attachments')
+    @field_validator('attachments')
     def validate_attachments(cls, v):
         if len(v) > 3:
             raise ValueError('Maksimal 3 lampiran per respons')
@@ -215,7 +215,7 @@ class ConsultationAssignDTO(BaseModel):
     notes: Optional[str] = Field(None, description="Catatan penugasan")
     due_date: Optional[datetime] = Field(None, description="Batas waktu")
     
-    @validator('due_date')
+    @field_validator('due_date')
     def validate_due_date(cls, v):
         if v and v <= datetime.now():
             raise ValueError('Batas waktu harus di masa depan')
@@ -226,7 +226,7 @@ class ConsultationStatusUpdateDTO(BaseModel):
     status: str = Field(..., description="Status baru")
     notes: Optional[str] = Field(None, description="Catatan")
     
-    @validator('status')
+    @field_validator('status')
     def validate_status(cls, v):
         valid_statuses = ['open', 'in_progress', 'waiting_response', 'resolved', 'closed']
         if v not in valid_statuses:
@@ -237,6 +237,19 @@ class ConsultationSatisfactionDTO(BaseModel):
     """DTO untuk rating kepuasan konsultasi"""
     rating: int = Field(..., ge=1, le=5, description="Rating kepuasan (1-5)")
     feedback: Optional[str] = Field(None, max_length=1000, description="Feedback kepuasan")
+    
+class ConsultationRatingDTO(BaseModel):
+    """DTO untuk rating konsultasi"""
+    consultation_id: str = Field(..., description="ID konsultasi")
+    user_id: str = Field(..., description="ID pengguna")
+    rating: int = Field(..., ge=1, le=5, description="Rating konsultasi (1-5)")
+    feedback: Optional[str] = Field(None, max_length=1000, description="Feedback rating")
+    
+    @field_validator('rating')
+    def validate_rating(cls, v):
+        if v < 1 or v > 5:
+            raise ValueError('Rating harus antara 1-5')
+        return v
     
 class ConsultationAnalyticsDTO(BaseModel):
     """DTO untuk analytics konsultasi"""
@@ -259,14 +272,14 @@ class ConsultationBulkActionDTO(BaseModel):
     value: Optional[Any] = Field(None, description="Nilai untuk aksi")
     notes: Optional[str] = Field(None, description="Catatan")
     
-    @validator('action')
+    @field_validator('action')
     def validate_action(cls, v):
         valid_actions = ['assign', 'change_status', 'change_priority', 'close', 'delete']
         if v not in valid_actions:
             raise ValueError(f'Aksi {v} tidak valid')
         return v
     
-    @validator('consultation_ids')
+    @field_validator('consultation_ids')
     def validate_consultation_ids(cls, v):
         if len(v) > 50:
             raise ValueError('Maksimal 50 konsultasi per aksi bulk')

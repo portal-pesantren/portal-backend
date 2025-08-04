@@ -1,6 +1,5 @@
 # Routers Layer
 from .base_router import BaseRouter
-from .pesantren_router import PesantrenRouter
 from .user_router import UserRouter
 from .review_router import ReviewRouter
 from .application_router import ApplicationRouter
@@ -9,7 +8,7 @@ from .consultation_router import ConsultationRouter
 from .app_router import AppRouter
 
 # FastAPI Routers
-from .pesantren_fastapi_router import pesantren_router
+from .pesantren_router import pesantren_router
 from .user_fastapi_router import user_router
 from .review_fastapi_router import review_router
 from .application_fastapi_router import application_router
@@ -18,7 +17,6 @@ from .consultation_fastapi_router import consultation_router
 
 __all__ = [
     "BaseRouter",
-    "PesantrenRouter",
     "UserRouter",
     "ReviewRouter",
     "ApplicationRouter",

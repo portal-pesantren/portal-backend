@@ -1,6 +1,5 @@
 from typing import Dict, Any, List
 from .base_router import BaseRouter
-from .pesantren_router import PesantrenRouter
 from .user_router import UserRouter
 from .review_router import ReviewRouter
 from .application_router import ApplicationRouter
@@ -19,13 +18,13 @@ class AppRouter(BaseRouter):
     def _initialize_routers(self):
         """Initialize semua domain routers"""
         self.domain_routers = {
-            "pesantren": PesantrenRouter(),
             "user": UserRouter(),
             "review": ReviewRouter(),
             "application": ApplicationRouter(),
             "news": NewsRouter(),
             "consultation": ConsultationRouter()
         }
+        # Note: pesantren router now uses FastAPI APIRouter instead of class-based router
     
     def _register_routes(self):
         """Register routes dari semua domain routers"""

@@ -19,7 +19,8 @@ from dto.user_dto import (
     UserResetPasswordDTO
 )
 from dto.base_dto import PaginationDTO, PaginatedResponseDTO, SuccessResponseDTO
-from .base_service import BaseService, NotFoundException, DuplicateException, ValidationException, PermissionException
+from .base_service import BaseService
+from core.exceptions import NotFoundException, DuplicateException, ValidationException, PermissionException
 
 class UserService(BaseService[UserCreateDTO, UserModel]):
     """Service untuk mengelola pengguna"""

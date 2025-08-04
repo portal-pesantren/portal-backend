@@ -20,7 +20,8 @@ from dto.application_dto import (
     ParentDataDTO
 )
 from dto.base_dto import PaginationDTO, PaginatedResponseDTO, SuccessResponseDTO
-from .base_service import BaseService, NotFoundException, DuplicateException, ValidationException, PermissionException
+from .base_service import BaseService
+from core.exceptions import NotFoundException, DuplicateException, ValidationException, PermissionException
 
 class ApplicationService(BaseService[ApplicationCreateDTO, ApplicationModel]):
     """Service untuk mengelola pendaftaran pesantren"""

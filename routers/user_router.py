@@ -2,7 +2,7 @@ from typing import Dict, Any
 from .base_router import BaseRouter
 from services.user_service import UserService
 from dto.user_dto import (
-    UserCreateDTO, UserUpdateDTO, UserLoginDTO, UserPasswordChangeDTO,
+    UserCreateDTO, UserUpdateDTO, UserLoginDTO, UserPasswordUpdateDTO,
     UserSearchDTO, UserFilterDTO, UserStatsDTO
 )
 
@@ -221,7 +221,7 @@ class UserRouter(BaseRouter):
                 data = self.sanitize_input(request_context["data"])
                 
                 # Create DTO
-                password_dto = UserPasswordChangeDTO(**data)
+                password_dto = UserPasswordUpdateDTO(**data)
                 
                 # Change password
                 result = self.user_service.change_password(user_id, password_dto)

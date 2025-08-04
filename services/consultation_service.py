@@ -19,7 +19,8 @@ from dto.consultation_dto import (
     ConsultationBulkActionDTO
 )
 from dto.base_dto import PaginationDTO, PaginatedResponseDTO, SuccessResponseDTO
-from .base_service import BaseService, NotFoundException, DuplicateException, ValidationException, PermissionException
+from .base_service import BaseService
+from core.exceptions import NotFoundException, DuplicateException, ValidationException, PermissionException
 
 class ConsultationService(BaseService[ConsultationCreateDTO, ConsultationModel]):
     """Service untuk mengelola konsultasi pesantren"""

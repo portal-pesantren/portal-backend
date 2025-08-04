@@ -61,7 +61,7 @@ class SearchDTO(BaseModel):
     page: int = Field(1, ge=1, description="Nomor halaman")
     limit: int = Field(10, ge=1, le=100, description="Jumlah item per halaman")
     sort_by: Optional[str] = Field(None, description="Field untuk sorting")
-    sort_order: Optional[str] = Field("desc", regex="^(asc|desc)$", description="Urutan sorting")
+    sort_order: Optional[str] = Field("desc", pattern="^(asc|desc)$", description="Urutan sorting")
 
 class FilterDTO(BaseModel):
     """Base DTO untuk filter"""

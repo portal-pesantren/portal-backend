@@ -102,6 +102,7 @@ from .consultation_dto import (
     ConsultationAssignDTO,
     ConsultationStatusUpdateDTO,
     ConsultationSatisfactionDTO,
+    ConsultationRatingDTO,
     ConsultationAnalyticsDTO,
     ConsultationBulkActionDTO
 )
@@ -205,6 +206,7 @@ __all__ = [
     'ConsultationAssignDTO',
     'ConsultationStatusUpdateDTO',
     'ConsultationSatisfactionDTO',
+    'ConsultationRatingDTO',
     'ConsultationAnalyticsDTO',
     'ConsultationBulkActionDTO'
 ]
