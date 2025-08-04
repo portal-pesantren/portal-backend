@@ -30,8 +30,8 @@ async def lifespan(app: FastAPI):
 def create_app():
     # Import router inside function to avoid circular import
     from routers.pesantren_router import pesantren_router
-    from routers.news_fastapi_router import news_router
-    from routers.review_fastapi_router import review_router
+    from routers.news_router import news_router
+    from routers.review_router import review_router
     from routers.user_fastapi_router import user_router
     from routers.application_fastapi_router import application_router
     from routers.consultation_fastapi_router import consultation_router

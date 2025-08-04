@@ -144,6 +144,88 @@ class ApplicationService(BaseService[ApplicationCreateDTO, ApplicationModel]):
                 code="GET_APPLICATION_ERROR"
             )
     
+    def get_applications_list(
+        self,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[ApplicationSearchDTO] = None,
+        filters: Optional[ApplicationFilterDTO] = None
+    ) -> PaginatedResponseDTO:
+        """Mendapatkan daftar semua pendaftaran dengan paginasi, pencarian, dan filter"""
+        try:
+            # Validate pagination
+            pagination_dto = PaginationDTO(page=page, limit=limit)
+            
+            # Build query
+            query = {}
+            
+            # Apply search
+            if search and search.query:
+                query["$or"] = [
+                    {"application_number": {"$regex": search.query, "$options": "i"}},
+                    {"student_data.full_name": {"$regex": search.query, "$options": "i"}},
+                    {"student_data.email": {"$regex": search.query, "$options": "i"}}
+                ]
+            
+            # Apply filters
+            if filters:
+                if filters.pesantren_id:
+                    query["pesantren_id"] = filters.pesantren_id
+                if filters.user_id:
+                    query["user_id"] = filters.user_id
+                if filters.status:
+                    query["status"] = filters.status
+                if filters.application_type:
+                    query["application_type"] = filters.application_type
+                if filters.submitted_from:
+                    query["submission_date"] = {"$gte": filters.submitted_from}
+                if filters.submitted_to:
+                    query.setdefault("submission_date", {})["$lte"] = filters.submitted_to
+                if filters.interview_scheduled is not None:
+                    if filters.interview_scheduled:
+                        query["interview_date"] = {"$exists": True, "$ne": None}
+                    else:
+                        query["$or"] = [
+                            {"interview_date": {"$exists": False}},
+                            {"interview_date": None}
+                        ]
+            
+            # Calculate skip
+            skip = (pagination_dto.page - 1) * pagination_dto.limit
+            
+            # Get applications with details
+            applications = self.model.get_applications_with_pagination(
+                query=query,
+                skip=skip,
+                limit=pagination_dto.limit,
+                sort=[("created_at", -1)]
+            )
+            
+            # Get total count
+            total = self.model.count_documents(query)
+            
+            # Convert to response DTOs
+            response_data = [ApplicationResponseDTO(**app).dict() for app in applications]
+            
+            return PaginatedResponseDTO(
+                data=response_data,
+                pagination={
+                    "page": pagination_dto.page,
+                    "limit": pagination_dto.limit,
+                    "total": total,
+                    "pages": (total + pagination_dto.limit - 1) // pagination_dto.limit
+                },
+                message="Daftar pendaftaran berhasil diambil"
+            )
+            
+        except ValidationException as e:
+            return self.handle_service_exception(e)
+        except Exception as e:
+            return self.create_error_response(
+                message="Gagal mengambil daftar pendaftaran",
+                code="GET_APPLICATIONS_LIST_ERROR"
+            )
+    
     def get_applications_by_user(
         self,
         user_id: str,

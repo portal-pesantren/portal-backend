@@ -127,6 +127,79 @@ class ReviewService(BaseService[ReviewCreateDTO, ReviewModel]):
                 code="GET_REVIEW_ERROR"
             )
     
+    def get_reviews_list(
+        self,
+        page: int = 1,
+        limit: int = 10,
+        search: Optional[ReviewSearchDTO] = None,
+        filters: Optional[ReviewFilterDTO] = None
+    ) -> PaginatedResponseDTO:
+        """Mendapatkan daftar semua ulasan dengan pagination dan filter"""
+        try:
+            # Validate pagination
+            pagination_dto = PaginationDTO(page=page, limit=limit)
+            
+            # Build query
+            query = {"is_deleted": False}
+            
+            # Apply filters
+            if filters:
+                filter_dict = filters.dict(exclude_unset=True)
+                for key, value in filter_dict.items():
+                    if value is not None:
+                        if key in ["min_rating", "max_rating"]:
+                            if "rating" not in query:
+                                query["rating"] = {}
+                            if key == "min_rating":
+                                query["rating"]["$gte"] = value
+                            else:
+                                query["rating"]["$lte"] = value
+                        else:
+                            query[key] = value
+            
+            # Apply search
+            if search and search.query:
+                query["$or"] = [
+                    {"title": {"$regex": search.query, "$options": "i"}},
+                    {"content": {"$regex": search.query, "$options": "i"}}
+                ]
+            
+            # Build sort
+            sort_order = []
+            if search and search.sort_by:
+                direction = -1 if search.sort_order == "desc" else 1
+                sort_order.append((search.sort_by, direction))
+            else:
+                sort_order.append(("created_at", -1))  # Default: newest first
+            
+            # Get data with pagination
+            skip = (pagination_dto.page - 1) * pagination_dto.limit
+            
+            reviews = self.model.find_many(
+                filter_dict=query,
+                skip=skip,
+                limit=pagination_dto.limit,
+                sort=sort_order
+            )
+            
+            total = self.model.count(query)
+            
+            # Convert to response DTOs
+            response_data = [ReviewResponseDTO(**review).dict() for review in reviews]
+            
+            return self.create_paginated_response(
+                data=response_data,
+                pagination=pagination_dto,
+                total=total,
+                message="Daftar ulasan berhasil diambil"
+            )
+            
+        except Exception as e:
+            return self.create_error_response(
+                message="Gagal mengambil daftar ulasan",
+                code="GET_REVIEWS_LIST_ERROR"
+            )
+    
     def get_reviews_by_pesantren(
         self,
         pesantren_id: str,

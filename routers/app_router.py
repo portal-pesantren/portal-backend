@@ -1,9 +1,9 @@
 from typing import Dict, Any, List
 from .base_router import BaseRouter
 from .user_router import UserRouter
-from .review_router import ReviewRouter
+# from .review_router import ReviewRouter  # Converted to FastAPI APIRouter
 from .application_router import ApplicationRouter
-from .news_router import NewsRouter
+# from .news_router import NewsRouter  # Converted to FastAPI APIRouter
 from .consultation_router import ConsultationRouter
 
 class AppRouter(BaseRouter):
@@ -19,9 +19,9 @@ class AppRouter(BaseRouter):
         """Initialize semua domain routers"""
         self.domain_routers = {
             "user": UserRouter(),
-            "review": ReviewRouter(),
+            # "review": ReviewRouter(),  # Converted to FastAPI APIRouter
             "application": ApplicationRouter(),
-            "news": NewsRouter(),
+            # "news": NewsRouter(),  # Converted to FastAPI APIRouter
             "consultation": ConsultationRouter()
         }
         # Note: pesantren router now uses FastAPI APIRouter instead of class-based router

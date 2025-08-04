@@ -1,378 +1,380 @@
-from typing import Dict, Any
-from .base_router import BaseRouter
+from fastapi import APIRouter, HTTPException, Query, Depends
+from typing import Optional, List, Dict, Any
+from pydantic import BaseModel
+from datetime import datetime
 from services.review_service import ReviewService
 from dto.review_dto import (
     ReviewCreateDTO, ReviewUpdateDTO, ReviewSearchDTO, 
     ReviewFilterDTO, ReviewStatsDTO, ReviewModerationDTO
 )
 
-class ReviewRouter(BaseRouter):
-    """Router untuk menangani endpoint ulasan pesantren"""
-    
-    def __init__(self):
-        super().__init__()
-        self.review_service = ReviewService()
-        self._register_routes()
-    
-    def _register_routes(self):
-        """Register semua routes untuk ulasan"""
+# Create FastAPI router
+review_router = APIRouter()
+
+# Initialize service
+review_service = ReviewService()
+
+# Pydantic models for request/response
+class ReviewCreateRequest(BaseModel):
+    pesantren_id: str
+    rating: int  # 1-5
+    title: str
+    content: str
+    pros: Optional[List[str]] = []
+    cons: Optional[List[str]] = []
+    is_anonymous: bool = False
+
+class ReviewUpdateRequest(BaseModel):
+    rating: Optional[int] = None
+    title: Optional[str] = None
+    content: Optional[str] = None
+    pros: Optional[List[str]] = None
+    cons: Optional[List[str]] = None
+    is_anonymous: Optional[bool] = None
+
+class ReviewHelpfulRequest(BaseModel):
+    is_helpful: bool
+
+class ReviewReportRequest(BaseModel):
+    reason: str
+    description: Optional[str] = None
+
+class ReviewModerationRequest(BaseModel):
+    status: str  # approved, rejected, pending
+    reason: Optional[str] = None
+
+# Dependency untuk authentication (placeholder - sesuaikan dengan sistem auth yang ada)
+async def get_current_user(token: str = None):
+    # TODO: Implement actual authentication logic
+    # For now, return a mock user
+    return {"user_id": "mock_user_id", "role": "user"}
+
+async def get_current_admin_user(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
+# Review endpoints
+@review_router.get("/reviews")
+async def get_reviews_list(
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: Optional[str] = Query(None, description="Search term"),
+    pesantren_id: Optional[str] = Query(None, description="Filter by pesantren"),
+    user_id: Optional[str] = Query(None, description="Filter by user"),
+    rating: Optional[int] = Query(None, ge=1, le=5, description="Filter by rating"),
+    min_rating: Optional[int] = Query(None, ge=1, le=5, description="Minimum rating"),
+    max_rating: Optional[int] = Query(None, ge=1, le=5, description="Maximum rating"),
+    is_verified: Optional[bool] = Query(None, description="Filter by verification status"),
+    status: Optional[str] = Query(None, description="Filter by status"),
+    created_from: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    created_to: Optional[str] = Query(None, description="Filter to date (YYYY-MM-DD)"),
+    sort_by: Optional[str] = Query("created_at", description="Sort field"),
+    sort_order: Optional[str] = Query("desc", description="Sort order")
+):
+    """Get list of reviews with pagination and filters"""
+    try:
+        # Create DTOs
+        search_dto = ReviewSearchDTO(
+            query=search or "",
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
         
-        # GET /reviews - Get all reviews with pagination, search, and filters
-        @self.get("/reviews")
-        def get_reviews_list(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                query_params = request_context["query_params"]
-                
-                # Extract pagination
-                pagination = self.extract_pagination(query_params)
-                
-                # Extract search parameters
-                search_params = self.extract_search_params(query_params)
-                
-                # Extract filter parameters
-                allowed_filters = [
-                    "pesantren_id", "user_id", "rating", "min_rating", "max_rating",
-                    "is_verified", "status", "created_from", "created_to"
-                ]
-                filter_params = self.extract_filter_params(query_params, allowed_filters)
-                
-                # Create DTOs
-                search_dto = ReviewSearchDTO(
-                    query=search_params.get("query", ""),
-                    sort_by=search_params.get("sort_by", "created_at"),
-                    sort_order=search_params.get("sort_order", "desc")
-                )
-                
-                filter_dto = ReviewFilterDTO(**filter_params)
-                
-                # Get reviews list
-                result = self.review_service.get_reviews_list(
-                    page=pagination["page"],
-                    limit=pagination["limit"],
-                    search=search_dto,
-                    filters=filter_dto
-                )
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Daftar ulasan berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        filter_dto = ReviewFilterDTO(
+            pesantren_id=pesantren_id,
+            user_id=user_id,
+            rating=rating,
+            min_rating=min_rating,
+            max_rating=max_rating,
+            is_verified=is_verified,
+            status=status,
+            created_from=created_from,
+            created_to=created_to
+        )
         
-        # GET /reviews/pesantren/{pesantren_id} - Get reviews by pesantren
-        @self.get("/reviews/pesantren/{pesantren_id}")
-        def get_reviews_by_pesantren(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract pesantren_id from path
-                path_parts = request_context["path"].split("/")
-                pesantren_id = path_parts[-1]
-                
-                query_params = request_context["query_params"]
-                
-                # Extract pagination
-                pagination = self.extract_pagination(query_params)
-                
-                # Extract search parameters
-                search_params = self.extract_search_params(query_params)
-                
-                # Create search DTO
-                search_dto = ReviewSearchDTO(
-                    query=search_params.get("query", ""),
-                    sort_by=search_params.get("sort_by", "created_at"),
-                    sort_order=search_params.get("sort_order", "desc")
-                )
-                
-                # Get reviews by pesantren
-                result = self.review_service.get_reviews_by_pesantren(
-                    pesantren_id=pesantren_id,
-                    page=pagination["page"],
-                    limit=pagination["limit"],
-                    search=search_dto
-                )
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Ulasan pesantren berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        # Get reviews list
+        result = review_service.get_reviews_list(
+            page=page,
+            limit=limit,
+            search=search_dto,
+            filters=filter_dto
+        )
         
-        # GET /reviews/user/{user_id} - Get reviews by user
-        @self.get("/reviews/user/{user_id}")
-        @self.authenticate_required
-        def get_reviews_by_user(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract user_id from path
-                path_parts = request_context["path"].split("/")
-                target_user_id = path_parts[-1]
-                
-                # Check if user can access these reviews
-                current_user_id = request_context["user_id"]
-                user_role = self.get_user_role(current_user_id)
-                
-                if current_user_id != target_user_id and user_role != "admin":
-                    return self.create_error_response(
-                        message="Anda tidak memiliki akses untuk melihat ulasan pengguna ini",
-                        status_code=403,
-                        code="ACCESS_DENIED"
-                    )
-                
-                query_params = request_context["query_params"]
-                
-                # Extract pagination
-                pagination = self.extract_pagination(query_params)
-                
-                # Extract search parameters
-                search_params = self.extract_search_params(query_params)
-                
-                # Create search DTO
-                search_dto = ReviewSearchDTO(
-                    query=search_params.get("query", ""),
-                    sort_by=search_params.get("sort_by", "created_at"),
-                    sort_order=search_params.get("sort_order", "desc")
-                )
-                
-                # Get reviews by user
-                result = self.review_service.get_reviews_by_user(
-                    user_id=target_user_id,
-                    page=pagination["page"],
-                    limit=pagination["limit"],
-                    search=search_dto
-                )
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Ulasan pengguna berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        return {
+            "success": True,
+            "data": result,
+            "message": "Daftar ulasan berhasil diambil"
+        }
         
-        # GET /reviews/stats - Get review statistics
-        @self.get("/reviews/stats")
-        def get_review_stats(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                query_params = request_context["query_params"]
-                
-                stats_dto = ReviewStatsDTO(
-                    pesantren_id=query_params.get("pesantren_id"),
-                    group_by=query_params.get("group_by", "rating"),
-                    include_trends=query_params.get("include_trends", "false").lower() == "true"
-                )
-                
-                result = self.review_service.get_review_stats(stats_dto)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Statistik ulasan berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.get("/reviews/pesantren/{pesantren_id}")
+async def get_reviews_by_pesantren(
+    pesantren_id: str,
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: Optional[str] = Query(None, description="Search term"),
+    sort_by: Optional[str] = Query("created_at", description="Sort field"),
+    sort_order: Optional[str] = Query("desc", description="Sort order")
+):
+    """Get reviews by pesantren"""
+    try:
+        # Create search DTO
+        search_dto = ReviewSearchDTO(
+            query=search or "",
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
         
-        # GET /reviews/{review_id} - Get review by ID
-        @self.get("/reviews/{review_id}")
-        def get_review_by_id(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract review_id from path
-                path_parts = request_context["path"].split("/")
-                review_id = path_parts[-1]
-                
-                result = self.review_service.get_review_by_id(review_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Detail ulasan berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        # Get reviews by pesantren
+        result = review_service.get_reviews_by_pesantren(
+            pesantren_id=pesantren_id,
+            page=page,
+            limit=limit,
+            search=search_dto
+        )
         
-        # POST /reviews - Create new review
-        @self.post("/reviews")
-        @self.authenticate_required
-        def create_review(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                user_id = request_context["user_id"]
-                
-                # Validate content type
-                if not self.validate_content_type(request_context["headers"]):
-                    return self.create_error_response(
-                        message="Content-Type harus application/json",
-                        status_code=400,
-                        code="INVALID_CONTENT_TYPE"
-                    )
-                
-                # Sanitize input
-                data = self.sanitize_input(request_context["data"])
-                
-                # Add user_id to data
-                data["user_id"] = user_id
-                
-                # Create DTO
-                create_dto = ReviewCreateDTO(**data)
-                
-                # Create review
-                result = self.review_service.create_review(create_dto)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Ulasan berhasil dibuat",
-                    status_code=201
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        return {
+            "success": True,
+            "data": result,
+            "message": "Ulasan pesantren berhasil diambil"
+        }
         
-        # PUT /reviews/{review_id} - Update review
-        @self.put("/reviews/{review_id}")
-        @self.authenticate_required
-        def update_review(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract review_id from path
-                path_parts = request_context["path"].split("/")
-                review_id = path_parts[-1]
-                
-                user_id = request_context["user_id"]
-                
-                # Validate content type
-                if not self.validate_content_type(request_context["headers"]):
-                    return self.create_error_response(
-                        message="Content-Type harus application/json",
-                        status_code=400,
-                        code="INVALID_CONTENT_TYPE"
-                    )
-                
-                # Sanitize input
-                data = self.sanitize_input(request_context["data"])
-                
-                # Create DTO
-                update_dto = ReviewUpdateDTO(**data)
-                
-                # Update review
-                result = self.review_service.update_review(review_id, update_dto, user_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Ulasan berhasil diperbarui"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.get("/reviews/user/{user_id}")
+async def get_reviews_by_user(
+    user_id: str,
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: Optional[str] = Query(None, description="Search term"),
+    sort_by: Optional[str] = Query("created_at", description="Sort field"),
+    sort_order: Optional[str] = Query("desc", description="Sort order"),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get reviews by user"""
+    try:
+        # Check if user can access these reviews
+        if current_user["user_id"] != user_id and current_user.get("role") != "admin":
+            raise HTTPException(
+                status_code=403,
+                detail="Anda tidak memiliki akses untuk melihat ulasan pengguna ini"
+            )
         
-        # POST /reviews/{review_id}/helpful - Mark review as helpful
-        @self.post("/reviews/{review_id}/helpful")
-        @self.authenticate_required
-        def mark_helpful(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract review_id from path
-                path_parts = request_context["path"].split("/")
-                review_id = path_parts[-2]  # /reviews/{id}/helpful
-                
-                user_id = request_context["user_id"]
-                
-                # Mark as helpful
-                result = self.review_service.mark_helpful(review_id, user_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Ulasan berhasil ditandai sebagai bermanfaat"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        # Create search DTO
+        search_dto = ReviewSearchDTO(
+            query=search or "",
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
         
-        # POST /reviews/{review_id}/report - Report review
-        @self.post("/reviews/{review_id}/report")
-        @self.authenticate_required
-        def report_review(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract review_id from path
-                path_parts = request_context["path"].split("/")
-                review_id = path_parts[-2]  # /reviews/{id}/report
-                
-                user_id = request_context["user_id"]
-                
-                # Get report reason from request body
-                data = request_context["data"]
-                reason = data.get("reason", "Konten tidak pantas")
-                
-                # Report review
-                result = self.review_service.report_review(review_id, user_id, reason)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Ulasan berhasil dilaporkan"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        # Get reviews by user
+        result = review_service.get_reviews_by_user(
+            user_id=user_id,
+            page=page,
+            limit=limit,
+            search=search_dto
+        )
         
-        # POST /reviews/{review_id}/moderate - Moderate review (admin only)
-        @self.post("/reviews/{review_id}/moderate")
-        @self.authenticate_required
-        @self.admin_required
-        def moderate_review(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract review_id from path
-                path_parts = request_context["path"].split("/")
-                review_id = path_parts[-2]  # /reviews/{id}/moderate
-                
-                moderator_id = request_context["user_id"]
-                
-                # Validate content type
-                if not self.validate_content_type(request_context["headers"]):
-                    return self.create_error_response(
-                        message="Content-Type harus application/json",
-                        status_code=400,
-                        code="INVALID_CONTENT_TYPE"
-                    )
-                
-                # Sanitize input
-                data = self.sanitize_input(request_context["data"])
-                
-                # Add moderator_id to data
-                data["moderator_id"] = moderator_id
-                
-                # Create DTO
-                moderation_dto = ReviewModerationDTO(**data)
-                
-                # Moderate review
-                result = self.review_service.moderate_review(review_id, moderation_dto)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Ulasan berhasil dimoderasi"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        return {
+            "success": True,
+            "data": result,
+            "message": "Ulasan pengguna berhasil diambil"
+        }
         
-        # DELETE /reviews/{review_id} - Delete review (soft delete)
-        @self.delete("/reviews/{review_id}")
-        @self.authenticate_required
-        def delete_review(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract review_id from path
-                path_parts = request_context["path"].split("/")
-                review_id = path_parts[-1]
-                
-                user_id = request_context["user_id"]
-                
-                # Delete review
-                result = self.review_service.delete_review(review_id, user_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Ulasan berhasil dihapus"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
-    
-    def get_routes(self) -> Dict[str, Any]:
-        """Get all registered routes"""
-        return self.routes
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.get("/reviews/stats")
+async def get_review_stats(
+    pesantren_id: Optional[str] = Query(None, description="Filter by pesantren"),
+    group_by: Optional[str] = Query("rating", description="Group by field"),
+    include_trends: Optional[bool] = Query(False, description="Include trend data")
+):
+    """Get review statistics"""
+    try:
+        stats_dto = ReviewStatsDTO(
+            pesantren_id=pesantren_id,
+            group_by=group_by,
+            include_trends=include_trends
+        )
+        
+        result = review_service.get_review_stats(stats_dto)
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Statistik ulasan berhasil diambil"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.get("/reviews/{review_id}")
+async def get_review_by_id(review_id: str):
+    """Get review by ID"""
+    try:
+        result = review_service.get_review_by_id(review_id)
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Detail ulasan berhasil diambil"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.post("/reviews")
+async def create_review(
+    review_data: ReviewCreateRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create new review"""
+    try:
+        # Add user_id to data
+        create_dto = ReviewCreateDTO(
+            user_id=current_user["user_id"],
+            pesantren_id=review_data.pesantren_id,
+            rating=review_data.rating,
+            title=review_data.title,
+            content=review_data.content,
+            pros=review_data.pros,
+            cons=review_data.cons,
+            is_anonymous=review_data.is_anonymous
+        )
+        
+        # Create review
+        result = review_service.create_review(create_dto)
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Ulasan berhasil dibuat"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.put("/reviews/{review_id}")
+async def update_review(
+    review_id: str,
+    review_data: ReviewUpdateRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update review"""
+    try:
+        # Create DTO
+        update_dto = ReviewUpdateDTO(
+            rating=review_data.rating,
+            title=review_data.title,
+            content=review_data.content,
+            pros=review_data.pros,
+            cons=review_data.cons,
+            is_anonymous=review_data.is_anonymous
+        )
+        
+        # Update review
+        result = review_service.update_review(review_id, update_dto, current_user["user_id"])
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Ulasan berhasil diperbarui"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.post("/reviews/{review_id}/helpful")
+async def mark_helpful(
+    review_id: str,
+    helpful_data: ReviewHelpfulRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Mark review as helpful"""
+    try:
+        # Mark as helpful
+        result = review_service.mark_helpful(review_id, current_user["user_id"])
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Ulasan berhasil ditandai sebagai bermanfaat"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.post("/reviews/{review_id}/report")
+async def report_review(
+    review_id: str,
+    report_data: ReviewReportRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Report review"""
+    try:
+        # Report review
+        result = review_service.report_review(
+            review_id, 
+            current_user["user_id"], 
+            report_data.reason
+        )
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Ulasan berhasil dilaporkan"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.post("/reviews/{review_id}/moderate")
+async def moderate_review(
+    review_id: str,
+    moderation_data: ReviewModerationRequest,
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """Moderate review (admin only)"""
+    try:
+        # Create DTO
+        moderation_dto = ReviewModerationDTO(
+            status=moderation_data.status,
+            reason=moderation_data.reason,
+            moderator_id=current_user["user_id"]
+        )
+        
+        # Moderate review
+        result = review_service.moderate_review(review_id, moderation_dto)
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Ulasan berhasil dimoderasi"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@review_router.delete("/reviews/{review_id}")
+async def delete_review(
+    review_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete review (soft delete)"""
+    try:
+        # Delete review
+        result = review_service.delete_review(review_id, current_user["user_id"])
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Ulasan berhasil dihapus"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

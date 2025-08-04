@@ -1,415 +1,208 @@
-from typing import Dict, Any
-from .base_router import BaseRouter
+from typing import Dict, Any, Optional
+from fastapi import APIRouter, HTTPException, Depends, Query
 from services.news_service import NewsService
 from dto.news_dto import (
     NewsCreateDTO, NewsUpdateDTO, NewsSearchDTO, 
     NewsFilterDTO, NewsStatsDTO
 )
+# Dependency untuk authentication (placeholder - sesuaikan dengan sistem auth yang ada)
+async def get_current_user(token: str = None):
+    # TODO: Implement actual authentication logic
+    # For now, return a mock user
+    return {"user_id": "mock_user_id", "role": "user"}
 
-class NewsRouter(BaseRouter):
-    """Router untuk menangani endpoint berita pesantren"""
-    
-    def __init__(self):
-        super().__init__()
-        self.news_service = NewsService()
-        self._register_routes()
-    
-    def _register_routes(self):
-        """Register semua routes untuk berita"""
+async def get_current_admin_user(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+# from models.user import User  # Not needed with dict-based auth
+
+# Initialize router and service
+news_router = APIRouter(prefix="/news", tags=["news"])
+news_service = NewsService()
+
+# GET /news - Get all news with pagination, search, and filters
+@news_router.get("/")
+def get_news_list(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=100),
+    query: Optional[str] = Query(None),
+    sort_by: str = Query("published_at"),
+    sort_order: str = Query("desc"),
+    pesantren_id: Optional[str] = Query(None),
+    author_id: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
+    is_featured: Optional[bool] = Query(None),
+    is_published: Optional[bool] = Query(None),
+    published_from: Optional[str] = Query(None),
+    published_to: Optional[str] = Query(None)
+):
+    """Get all news with pagination, search, and filters"""
+    try:
+        # Create DTOs
+        search_dto = NewsSearchDTO(
+            query=query or "",
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
         
-        # GET /news - Get all news with pagination, search, and filters
-        @self.get("/news")
-        def get_news_list(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                query_params = request_context["query_params"]
-                
-                # Extract pagination
-                pagination = self.extract_pagination(query_params)
-                
-                # Extract search parameters
-                search_params = self.extract_search_params(query_params)
-                
-                # Extract filter parameters
-                allowed_filters = [
-                    "pesantren_id", "author_id", "category", "is_featured", 
-                    "is_published", "published_from", "published_to"
-                ]
-                filter_params = self.extract_filter_params(query_params, allowed_filters)
-                
-                # Create DTOs
-                search_dto = NewsSearchDTO(
-                    query=search_params.get("query", ""),
-                    sort_by=search_params.get("sort_by", "published_at"),
-                    sort_order=search_params.get("sort_order", "desc")
-                )
-                
-                filter_dto = NewsFilterDTO(**filter_params)
-                
-                # Get news list
-                result = self.news_service.get_news_list(
-                    page=pagination["page"],
-                    limit=pagination["limit"],
-                    search=search_dto,
-                    filters=filter_dto
-                )
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Daftar berita berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        filter_dto = NewsFilterDTO(
+            pesantren_id=pesantren_id,
+            author_id=author_id,
+            category=category,
+            is_featured=is_featured,
+            is_published=is_published,
+            published_from=published_from,
+            published_to=published_to
+        )
         
-        # GET /news/featured - Get featured news
-        @self.get("/news/featured")
-        def get_featured_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                query_params = request_context["query_params"]
-                limit = int(query_params.get("limit", 10))
-                
-                result = self.news_service.get_featured_news(limit=limit)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita unggulan berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        # Get news list
+        pagination_params = {
+            "page": page,
+            "limit": limit
+        }
         
-        # GET /news/popular - Get popular news
-        @self.get("/news/popular")
-        def get_popular_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                query_params = request_context["query_params"]
-                limit = int(query_params.get("limit", 10))
-                
-                result = self.news_service.get_popular_news(limit=limit)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita populer berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        search_params = search_dto.dict() if search_dto else None
+        filter_params = filter_dto.dict() if filter_dto else None
         
-        # GET /news/stats - Get news statistics
-        @self.get("/news/stats")
-        @self.authenticate_required
-        @self.admin_required
-        def get_news_stats(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                query_params = request_context["query_params"]
-                
-                stats_dto = NewsStatsDTO(
-                    pesantren_id=query_params.get("pesantren_id"),
-                    group_by=query_params.get("group_by", "category"),
-                    include_engagement=query_params.get("include_engagement", "false").lower() == "true"
-                )
-                
-                result = self.news_service.get_news_stats(stats_dto)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Statistik berita berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        result = news_service.get_news_list(
+            search_params=search_params,
+            filter_params=filter_params,
+            pagination=pagination_params
+        )
         
-        # GET /news/slug/{slug} - Get news by slug
-        @self.get("/news/slug/{slug}")
-        def get_news_by_slug(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract slug from path
-                path_parts = request_context["path"].split("/")
-                slug = path_parts[-1]
-                
-                result = self.news_service.get_news_by_slug(slug)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Detail berita berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        return {
+            "success": True,
+            "data": result,
+            "message": "Daftar berita berhasil diambil"
+        }
         
-        # GET /news/{news_id} - Get news by ID
-        @self.get("/news/{news_id}")
-        def get_news_by_id(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-1]
-                
-                result = self.news_service.get_news_by_id(news_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Detail berita berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# GET /news/featured - Get featured news
+@news_router.get("/featured")
+def get_featured_news(limit: int = Query(10, ge=1, le=50)):
+    """Get featured news"""
+    try:
+        result = news_service.get_featured_news(limit=limit)
         
-        # GET /news/{news_id}/related - Get related news
-        @self.get("/news/{news_id}/related")
-        def get_related_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-2]  # /news/{id}/related
-                
-                query_params = request_context["query_params"]
-                limit = int(query_params.get("limit", 5))
-                
-                result = self.news_service.get_related_news(news_id, limit=limit)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita terkait berhasil diambil"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        return {
+            "success": True,
+            "data": result,
+            "message": "Berita unggulan berhasil diambil"
+        }
         
-        # POST /news - Create new news
-        @self.post("/news")
-        @self.authenticate_required
-        @self.admin_required
-        def create_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                author_id = request_context["user_id"]
-                
-                # Validate content type
-                if not self.validate_content_type(request_context["headers"]):
-                    return self.create_error_response(
-                        message="Content-Type harus application/json",
-                        status_code=400,
-                        code="INVALID_CONTENT_TYPE"
-                    )
-                
-                # Sanitize input
-                data = self.sanitize_input(request_context["data"])
-                
-                # Add author_id to data
-                data["author_id"] = author_id
-                
-                # Create DTO
-                create_dto = NewsCreateDTO(**data)
-                
-                # Create news
-                result = self.news_service.create_news(create_dto)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita berhasil dibuat",
-                    status_code=201
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# GET /news/popular - Get popular news
+@news_router.get("/popular")
+def get_popular_news(limit: int = Query(10, ge=1, le=50)):
+    """Get popular news"""
+    try:
+        result = news_service.get_popular_news(limit=limit)
         
-        # PUT /news/{news_id} - Update news
-        @self.put("/news/{news_id}")
-        @self.authenticate_required
-        @self.admin_required
-        def update_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-1]
-                
-                user_id = request_context["user_id"]
-                
-                # Validate content type
-                if not self.validate_content_type(request_context["headers"]):
-                    return self.create_error_response(
-                        message="Content-Type harus application/json",
-                        status_code=400,
-                        code="INVALID_CONTENT_TYPE"
-                    )
-                
-                # Sanitize input
-                data = self.sanitize_input(request_context["data"])
-                
-                # Create DTO
-                update_dto = NewsUpdateDTO(**data)
-                
-                # Update news
-                result = self.news_service.update_news(news_id, update_dto, user_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita berhasil diperbarui"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        return {
+            "success": True,
+            "data": result,
+            "message": "Berita populer berhasil diambil"
+        }
         
-        # PATCH /news/{news_id}/publish - Publish news
-        @self.patch("/news/{news_id}/publish")
-        @self.authenticate_required
-        @self.admin_required
-        def publish_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-2]  # /news/{id}/publish
-                
-                user_id = request_context["user_id"]
-                
-                # Publish news
-                result = self.news_service.publish_news(news_id, user_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita berhasil dipublikasikan"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# GET /news/stats - Get news statistics
+@news_router.get("/stats")
+def get_news_stats(current_user: dict = Depends(get_current_user)):
+    """Get news statistics"""
+    try:
+        result = news_service.get_news_stats()
         
-        # PATCH /news/{news_id}/unpublish - Unpublish news
-        @self.patch("/news/{news_id}/unpublish")
-        @self.authenticate_required
-        @self.admin_required
-        def unpublish_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-2]  # /news/{id}/unpublish
-                
-                user_id = request_context["user_id"]
-                
-                # Unpublish news (implement in service)
-                # result = self.news_service.unpublish_news(news_id, user_id)
-                
-                # For now, return success response
-                return self.create_success_response(
-                    data={"news_id": news_id, "is_published": False},
-                    message="Berita berhasil dibatalkan publikasinya"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        return {
+            "success": True,
+            "data": result,
+            "message": "Statistik berita berhasil diambil"
+        }
         
-        # POST /news/{news_id}/like - Like news
-        @self.post("/news/{news_id}/like")
-        @self.authenticate_required
-        def like_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-2]  # /news/{id}/like
-                
-                user_id = request_context["user_id"]
-                
-                # Like news
-                result = self.news_service.like_news(news_id, user_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita berhasil disukai"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# GET /news/{news_id} - Get news by ID
+@news_router.get("/{news_id}")
+def get_news_by_id(news_id: str):
+    """Get news by ID"""
+    try:
+        result = news_service.get_news_by_id(news_id)
         
-        # POST /news/{news_id}/dislike - Dislike news
-        @self.post("/news/{news_id}/dislike")
-        @self.authenticate_required
-        def dislike_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-2]  # /news/{id}/dislike
-                
-                user_id = request_context["user_id"]
-                
-                # Dislike news
-                result = self.news_service.dislike_news(news_id, user_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita berhasil tidak disukai"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        if not result:
+            raise HTTPException(status_code=404, detail="Berita tidak ditemukan")
         
-        # DELETE /news/{news_id}/like - Remove like from news
-        @self.delete("/news/{news_id}/like")
-        @self.authenticate_required
-        def remove_like_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-2]  # /news/{id}/like
-                
-                user_id = request_context["user_id"]
-                
-                # Remove like from news (implement in service)
-                # result = self.news_service.remove_like_news(news_id, user_id)
-                
-                # For now, return success response
-                return self.create_success_response(
-                    data={"news_id": news_id, "user_id": user_id, "action": "like_removed"},
-                    message="Like berhasil dihapus dari berita"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+        return {
+            "success": True,
+            "data": result,
+            "message": "Detail berita berhasil diambil"
+        }
         
-        # DELETE /news/{news_id}/dislike - Remove dislike from news
-        @self.delete("/news/{news_id}/dislike")
-        @self.authenticate_required
-        def remove_dislike_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-2]  # /news/{id}/dislike
-                
-                user_id = request_context["user_id"]
-                
-                # Remove dislike from news (implement in service)
-                # result = self.news_service.remove_dislike_news(news_id, user_id)
-                
-                # For now, return success response
-                return self.create_success_response(
-                    data={"news_id": news_id, "user_id": user_id, "action": "dislike_removed"},
-                    message="Dislike berhasil dihapus dari berita"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# POST /news - Create new news
+@news_router.post("/")
+def create_news(
+    news_data: NewsCreateDTO,
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """Create new news"""
+    try:
+        result = news_service.create_news(news_data, current_user.id)
         
-        # DELETE /news/{news_id} - Delete news (soft delete)
-        @self.delete("/news/{news_id}")
-        @self.authenticate_required
-        @self.admin_required
-        def delete_news(request_context: Dict[str, Any]) -> Dict[str, Any]:
-            try:
-                # Extract news_id from path
-                path_parts = request_context["path"].split("/")
-                news_id = path_parts[-1]
-                
-                user_id = request_context["user_id"]
-                
-                # Delete news
-                result = self.news_service.delete_news(news_id, user_id)
-                
-                return self.create_success_response(
-                    data=result,
-                    message="Berita berhasil dihapus"
-                )
-                
-            except Exception as e:
-                return self.handle_exception(e)
-    
-    def get_routes(self) -> Dict[str, Any]:
-        """Get all registered routes"""
-        return self.routes
+        return {
+            "success": True,
+            "data": result,
+            "message": "Berita berhasil dibuat"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# PUT /news/{news_id} - Update news
+@news_router.put("/{news_id}")
+def update_news(
+    news_id: str,
+    news_data: NewsUpdateDTO,
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """Update news"""
+    try:
+        result = news_service.update_news(news_id, news_data, current_user.get("user_id"))
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Berita berhasil diperbarui"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# DELETE /news/{news_id} - Delete news
+@news_router.delete("/{news_id}")
+def delete_news(
+    news_id: str,
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """Delete news"""
+    try:
+        result = news_service.delete_news(news_id, current_user.id)
+        
+        return {
+            "success": True,
+            "data": result,
+            "message": "Berita berhasil dihapus"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

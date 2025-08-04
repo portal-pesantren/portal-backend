@@ -84,7 +84,7 @@ class DatabaseConfig:
         """
         Mendapatkan collection dari database
         """
-        if not self.database:
+        if self.database is None:
             raise Exception("Database belum terkoneksi")
         return self.database[collection_name]
     
@@ -103,7 +103,7 @@ def get_database() -> Database:
     """
     Mendapatkan instance database
     """
-    if not db_config.database:
+    if db_config.database is None:
         return db_config.connect()
     return db_config.database
 
