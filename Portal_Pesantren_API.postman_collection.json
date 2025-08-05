@@ -1,0 +1,1494 @@
+{
+	"info": {
+		"_postman_id": "portal-pesantren-api-collection",
+		"name": "Portal Pesantren API",
+		"description": "Koleksi lengkap API endpoints untuk Portal Pesantren - Platform pencarian dan informasi pesantren terbaik di Indonesia",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "portal-pesantren"
+	},
+	"item": [
+		{
+			"name": "Health & Info",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/health",
+									"host": ["{{base_url}}"],
+									"path": ["health"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"status\": \"healthy\",\n  \"message\": \"Portal Pesantren API is running\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Featured Pesantren",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren/featured?limit=5",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren", "featured"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren/featured?limit=5",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren", "featured"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Pesantren unggulan berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n      \"name\": \"Pondok Pesantren Al-Hikmah\",\n      \"location\": \"Bogor, Jawa Barat\",\n      \"address\": \"Jl. Raya Bogor No. 123, Bogor, Jawa Barat\",\n      \"rating\": 4.8,\n      \"students_count\": 1200,\n      \"programs\": [\"Tahfidz Al-Quran\", \"Kitab Kuning\", \"Bahasa Arab\"],\n      \"image\": \"https://example.com/pesantren1.jpg\",\n      \"is_featured\": true,\n      \"description\": \"Pesantren modern dengan fasilitas lengkap dan kurikulum terpadu\"\n    }\n  ],\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Popular Pesantren",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren/popular?limit=5",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren", "popular"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren/popular?limit=5",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren", "popular"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Pesantren populer berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"60f7b3b3b3b3b3b3b3b3b3b4\",\n      \"name\": \"Pondok Pesantren Darul Ulum\",\n      \"location\": \"Yogyakarta, DIY\",\n      \"address\": \"Jl. Raya Yogyakarta No. 456, Yogyakarta, DIY\",\n      \"rating\": 4.9,\n      \"students_count\": 1500,\n      \"programs\": [\"Tahfidz Al-Quran\", \"Sains\", \"Teknologi\"],\n      \"image\": \"https://example.com/pesantren2.jpg\",\n      \"view_count\": 2500,\n      \"description\": \"Pesantren dengan program unggulan sains dan teknologi\"\n    }\n  ],\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Pesantren Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren", "stats"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren/stats",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren", "stats"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Statistik pesantren berhasil diambil\",\n  \"data\": {\n    \"total_pesantren\": 1250,\n    \"total_students\": 125000,\n    \"total_provinces\": 34,\n    \"featured_count\": 50,\n    \"average_rating\": 4.6,\n    \"popular_programs\": [\n      {\"name\": \"Tahfidz Al-Quran\", \"count\": 980},\n      {\"name\": \"Kitab Kuning\", \"count\": 850},\n      {\"name\": \"Bahasa Arab\", \"count\": 720}\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Featured News",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/news/featured?limit=5",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "news", "featured"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/news/featured?limit=5",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "news", "featured"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Berita unggulan berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n      \"title\": \"Pesantren Modern Raih Prestasi Internasional\",\n      \"slug\": \"pesantren-modern-raih-prestasi-internasional\",\n      \"excerpt\": \"Santri dari Pesantren Al-Hikmah berhasil meraih juara dalam kompetisi hafalan Al-Quran tingkat internasional\",\n      \"content\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit...\",\n      \"image\": \"https://example.com/news1.jpg\",\n      \"author\": \"Admin Portal\",\n      \"published_at\": \"2024-01-15T08:00:00Z\",\n      \"is_featured\": true,\n      \"view_count\": 1250,\n      \"category\": \"Prestasi\"\n    }\n  ],\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Popular News",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/news/popular?limit=5",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "news", "popular"],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/news/popular?limit=5",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "news", "popular"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Berita populer berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"60f7b3b3b3b3b3b3b3b3b3b6\",\n      \"title\": \"Tips Memilih Pesantren yang Tepat untuk Anak\",\n      \"slug\": \"tips-memilih-pesantren-yang-tepat-untuk-anak\",\n      \"excerpt\": \"Panduan lengkap untuk orang tua dalam memilih pesantren terbaik sesuai kebutuhan dan minat anak\",\n      \"content\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit...\",\n      \"image\": \"https://example.com/news2.jpg\",\n      \"author\": \"Dr. Ahmad Fauzi\",\n      \"published_at\": \"2024-01-14T10:00:00Z\",\n      \"view_count\": 3500,\n      \"category\": \"Tips\"\n    }\n  ],\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get News Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/news/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "news", "stats"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/news/stats",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "news", "stats"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Statistik berita berhasil diambil\",\n  \"data\": {\n    \"total_news\": 450,\n    \"total_views\": 125000,\n    \"featured_count\": 25,\n    \"published_today\": 5,\n    \"published_this_week\": 18,\n    \"published_this_month\": 75,\n    \"popular_categories\": [\n      {\"name\": \"Prestasi\", \"count\": 120},\n      {\"name\": \"Tips\", \"count\": 95},\n      {\"name\": \"Kegiatan\", \"count\": 85}\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "User Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "logout"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{user_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/logout",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users", "logout"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Logout berhasil\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{user_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/profile",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users", "profile"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Profil pengguna berhasil diambil\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b1\",\n    \"username\": \"johndoe\",\n    \"email\": \"john@example.com\",\n    \"full_name\": \"John Doe\",\n    \"phone\": \"+6281234567890\",\n    \"role\": \"user\",\n    \"bio\": \"Orang tua yang mencari pesantren terbaik untuk anak\",\n    \"avatar\": \"https://example.com/avatar.jpg\",\n    \"is_active\": true,\n    \"created_at\": \"2024-01-01T00:00:00Z\",\n    \"updated_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update User Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"full_name\": \"John Doe Updated\",\n  \"phone\": \"+6281234567891\",\n  \"bio\": \"Orang tua yang aktif mencari informasi pesantren terbaik\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{user_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"full_name\": \"John Doe Updated\",\n  \"phone\": \"+6281234567891\",\n  \"bio\": \"Orang tua yang aktif mencari informasi pesantren terbaik\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/profile",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users", "profile"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Profil pengguna berhasil diperbarui\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b1\",\n    \"username\": \"johndoe\",\n    \"email\": \"john@example.com\",\n    \"full_name\": \"John Doe Updated\",\n    \"phone\": \"+6281234567891\",\n    \"bio\": \"Orang tua yang aktif mencari informasi pesantren terbaik\",\n    \"updated_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users?page=1&limit=10&search=john&role=user",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "john"
+								},
+								{
+									"key": "role",
+									"value": "user"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/users?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Daftar pengguna berhasil diambil\",\n  \"data\": [\n    {\n      \"id\": \"60f7b3b3b3b3b3b3b3b3b3b1\",\n      \"username\": \"johndoe\",\n      \"email\": \"john@example.com\",\n      \"full_name\": \"John Doe\",\n      \"role\": \"user\",\n      \"is_active\": true,\n      \"created_at\": \"2024-01-01T00:00:00Z\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 10,\n    \"total\": 1,\n    \"total_pages\": 1\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Pesantren (Admin)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pondok Pesantren Baru\",\n  \"description\": \"Pesantren modern dengan fasilitas lengkap\",\n  \"location\": \"Jakarta, DKI Jakarta\",\n  \"address\": \"Jl. Raya Jakarta No. 789, Jakarta, DKI Jakarta\",\n  \"phone\": \"+6281234567890\",\n  \"email\": \"info@pesantrenbaru.ac.id\",\n  \"website\": \"https://pesantrenbaru.ac.id\",\n  \"programs\": [\"Tahfidz Al-Quran\", \"Kitab Kuning\", \"Bahasa Arab\", \"Sains\"],\n  \"facilities\": [\"Masjid\", \"Asrama\", \"Perpustakaan\", \"Lab Komputer\"],\n  \"curriculum\": [\"Kurikulum Nasional\", \"Kurikulum Pesantren\"],\n  \"education_levels\": [\"SMP\", \"SMA\"],\n  \"capacity\": 500,\n  \"tuition_fee\": 2500000,\n  \"image\": \"https://example.com/pesantren-baru.jpg\",\n  \"video_url\": \"https://youtube.com/watch?v=example\",\n  \"established_year\": 2020,\n  \"accreditation\": \"A\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Pesantren berhasil dibuat\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b7\",\n    \"name\": \"Pondok Pesantren Baru\",\n    \"location\": \"Jakarta, DKI Jakarta\",\n    \"created_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Pesantren (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Pondok Pesantren Al-Hikmah Updated\",\n  \"description\": \"Pesantren modern dengan fasilitas lengkap dan kurikulum terpadu yang telah diperbarui\",\n  \"capacity\": 1500,\n  \"tuition_fee\": 3000000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren/{{pesantren_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren", "{{pesantren_id}}"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren/{{pesantren_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren", "{{pesantren_id}}"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Pesantren berhasil diperbarui\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n    \"name\": \"Pondok Pesantren Al-Hikmah Updated\",\n    \"description\": \"Pesantren modern dengan fasilitas lengkap dan kurikulum terpadu yang telah diperbarui\",\n    \"capacity\": 1500,\n    \"tuition_fee\": 3000000,\n    \"updated_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Set Featured Pesantren (Admin)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren/{{pesantren_id}}/featured",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren", "{{pesantren_id}}", "featured"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren/{{pesantren_id}}/featured",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren", "{{pesantren_id}}", "featured"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Status unggulan pesantren berhasil diperbarui\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n    \"name\": \"Pondok Pesantren Al-Hikmah\",\n    \"is_featured\": true,\n    \"updated_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Pesantren (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren/{{pesantren_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren", "{{pesantren_id}}"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren/{{pesantren_id}}",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren", "{{pesantren_id}}"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Pesantren berhasil dihapus\",\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"full_name\": \"Ahmad Fauzi\",\n  \"phone\": \"+62-812-3456-7890\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "register"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"full_name\": \"Ahmad Fauzi\",\n  \"phone\": \"+62-812-3456-7890\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/register",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users", "register"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"User berhasil didaftarkan\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n    \"email\": \"user@example.com\",\n    \"full_name\": \"Ahmad Fauzi\",\n    \"phone\": \"+62-812-3456-7890\",\n    \"role\": \"user\",\n    \"is_active\": true,\n    \"created_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "login"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/login",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users", "login"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Login berhasil\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n      \"email\": \"user@example.com\",\n      \"full_name\": \"Ahmad Fauzi\",\n      \"role\": \"user\"\n    },\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"token_type\": \"bearer\",\n    \"expires_in\": 3600\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Pesantren",
+			"item": [
+				{
+					"name": "Get All Pesantren",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren?page=1&limit=10&search=&location=&program=&is_active=true",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "location",
+									"value": ""
+								},
+								{
+									"key": "program",
+									"value": ""
+								},
+								{
+									"key": "is_active",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Daftar pesantren berhasil diambil\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n        \"name\": \"Pondok Pesantren Al-Hikmah\",\n        \"description\": \"Pesantren modern dengan kurikulum terpadu\",\n        \"location\": {\n          \"province\": \"Jawa Barat\",\n          \"city\": \"Bandung\",\n          \"district\": \"Cimahi\",\n          \"address\": \"Jl. Raya Cimahi No. 123\"\n        },\n        \"contact\": {\n          \"phone\": \"+62-22-1234567\",\n          \"email\": \"info@alhikmah.ac.id\",\n          \"website\": \"https://alhikmah.ac.id\"\n        },\n        \"programs\": [\"Tahfidz\", \"Kitab Kuning\", \"Sains\"],\n        \"facilities\": [\"Asrama\", \"Masjid\", \"Perpustakaan\", \"Lab Komputer\"],\n        \"education_levels\": [\"SMP/MTs\", \"SMA/MA\"],\n        \"capacity\": 500,\n        \"monthly_fee\": 1500000,\n        \"registration_fee\": 5000000,\n        \"rating\": 4.5,\n        \"total_reviews\": 125,\n        \"is_featured\": true,\n        \"established_year\": 1995,\n        \"accreditation\": \"A\",\n        \"images\": [\n          \"https://example.com/images/alhikmah1.jpg\",\n          \"https://example.com/images/alhikmah2.jpg\"\n        ],\n        \"created_at\": \"2023-01-15T08:00:00Z\",\n        \"updated_at\": \"2024-01-15T08:00:00Z\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 10,\n      \"total\": 150,\n      \"total_pages\": 15,\n      \"has_next\": true,\n      \"has_prev\": false\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Pesantren by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/pesantren/{{pesantren_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "pesantren", "{{pesantren_id}}"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/pesantren/60f7b3b3b3b3b3b3b3b3b3b3",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "pesantren", "60f7b3b3b3b3b3b3b3b3b3b3"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Detail pesantren berhasil diambil\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n    \"name\": \"Pondok Pesantren Al-Hikmah\",\n    \"description\": \"Pesantren modern dengan kurikulum terpadu yang menggabungkan pendidikan agama dan umum. Memiliki fasilitas lengkap dan tenaga pengajar yang berkualitas.\",\n    \"location\": {\n      \"province\": \"Jawa Barat\",\n      \"city\": \"Bandung\",\n      \"district\": \"Cimahi\",\n      \"address\": \"Jl. Raya Cimahi No. 123, Cimahi, Bandung, Jawa Barat 40512\",\n      \"coordinates\": {\n        \"latitude\": -6.8781,\n        \"longitude\": 107.5441\n      }\n    },\n    \"contact\": {\n      \"phone\": \"+62-22-1234567\",\n      \"email\": \"info@alhikmah.ac.id\",\n      \"website\": \"https://alhikmah.ac.id\",\n      \"whatsapp\": \"+62-812-3456-7890\"\n    },\n    \"programs\": [\"Tahfidz\", \"Kitab Kuning\", \"Sains\", \"Bahasa\", \"Komputer\"],\n    \"facilities\": [\"Asrama Putra\", \"Asrama Putri\", \"Masjid\", \"Perpustakaan\", \"Lab Komputer\", \"Lab Sains\", \"Lapangan Olahraga\", \"Kantin\", \"Klinik\"],\n    \"curriculum\": \"Kurikulum Nasional + Kurikulum Pesantren\",\n    \"education_levels\": [\"SMP/MTs\", \"SMA/MA\"],\n    \"capacity\": 500,\n    \"current_students\": 450,\n    \"monthly_fee\": 1500000,\n    \"registration_fee\": 5000000,\n    \"other_fees\": {\n      \"uniform\": 500000,\n      \"books\": 300000,\n      \"activity\": 200000\n    },\n    \"rating\": 4.5,\n    \"total_reviews\": 125,\n    \"is_featured\": true,\n    \"is_active\": true,\n    \"established_year\": 1995,\n    \"accreditation\": \"A\",\n    \"images\": [\n      \"https://example.com/images/alhikmah1.jpg\",\n      \"https://example.com/images/alhikmah2.jpg\",\n      \"https://example.com/images/alhikmah3.jpg\"\n    ],\n    \"video_url\": \"https://youtube.com/watch?v=example\",\n    \"created_at\": \"2023-01-15T08:00:00Z\",\n    \"updated_at\": \"2024-01-15T08:00:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "News",
+			"item": [
+				{
+					"name": "Get All News",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/news?page=1&limit=10&search=&category=&is_published=true",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "news"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "category",
+									"value": ""
+								},
+								{
+									"key": "is_published",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/news?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "news"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Daftar berita berhasil diambil\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": \"60f7b3b3b3b3b3b3b3b3b3b6\",\n        \"title\": \"Pesantren Modern Semakin Diminati Generasi Muda\",\n        \"content\": \"Tren pesantren modern yang menggabungkan pendidikan agama dan umum semakin diminati...\",\n        \"excerpt\": \"Pesantren modern menjadi pilihan utama orang tua untuk pendidikan anak\",\n        \"category\": \"Pendidikan\",\n        \"author\": \"Admin Portal\",\n        \"featured_image\": \"https://example.com/images/news1.jpg\",\n        \"is_published\": true,\n        \"is_featured\": false,\n        \"views\": 1250,\n        \"published_at\": \"2024-01-10T08:00:00Z\",\n        \"created_at\": \"2024-01-10T08:00:00Z\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 10,\n      \"total\": 45,\n      \"total_pages\": 5,\n      \"has_next\": true,\n      \"has_prev\": false\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get News by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/news/{{news_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "news", "{{news_id}}"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/news/60f7b3b3b3b3b3b3b3b3b3b6",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "news", "60f7b3b3b3b3b3b3b3b3b3b6"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Detail berita berhasil diambil\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b6\",\n    \"title\": \"Pesantren Modern Semakin Diminati Generasi Muda\",\n    \"content\": \"<p>Tren pesantren modern yang menggabungkan pendidikan agama dan umum semakin diminati oleh generasi muda. Hal ini terlihat dari meningkatnya jumlah pendaftar di berbagai pesantren modern di Indonesia.</p><p>Pesantren modern menawarkan kurikulum yang seimbang antara ilmu agama dan ilmu umum, sehingga santri dapat memperoleh pendidikan yang komprehensif. Selain itu, fasilitas yang disediakan juga lebih lengkap dan modern.</p>\",\n    \"excerpt\": \"Pesantren modern menjadi pilihan utama orang tua untuk pendidikan anak\",\n    \"category\": \"Pendidikan\",\n    \"tags\": [\"pesantren\", \"pendidikan\", \"modern\", \"santri\"],\n    \"author\": \"Admin Portal\",\n    \"featured_image\": \"https://example.com/images/news1.jpg\",\n    \"images\": [\n      \"https://example.com/images/news1-1.jpg\",\n      \"https://example.com/images/news1-2.jpg\"\n    ],\n    \"is_published\": true,\n    \"is_featured\": false,\n    \"views\": 1251,\n    \"published_at\": \"2024-01-10T08:00:00Z\",\n    \"created_at\": \"2024-01-10T08:00:00Z\",\n    \"updated_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "Get All Reviews",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/reviews?page=1&limit=10&pesantren_id=&rating=&sort_by=created_at&sort_order=desc",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "reviews"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "pesantren_id",
+									"value": ""
+								},
+								{
+									"key": "rating",
+									"value": ""
+								},
+								{
+									"key": "sort_by",
+									"value": "created_at"
+								},
+								{
+									"key": "sort_order",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/v1/reviews?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "reviews"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Daftar ulasan berhasil diambil\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": \"60f7b3b3b3b3b3b3b3b3b3b7\",\n        \"pesantren_id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n        \"pesantren_name\": \"Pondok Pesantren Al-Hikmah\",\n        \"user_id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n        \"user_name\": \"Ahmad Fauzi\",\n        \"rating\": 5,\n        \"title\": \"Pesantren yang sangat bagus\",\n        \"content\": \"Saya sangat puas dengan pendidikan di pesantren ini. Fasilitas lengkap dan pengajar berkualitas.\",\n        \"is_verified\": true,\n        \"helpful_count\": 15,\n        \"created_at\": \"2024-01-10T08:00:00Z\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 10,\n      \"total\": 85,\n      \"total_pages\": 9,\n      \"has_next\": true,\n      \"has_prev\": false\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pesantren_id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n  \"rating\": 5,\n  \"title\": \"Pesantren yang sangat bagus\",\n  \"content\": \"Saya sangat puas dengan pendidikan di pesantren ini. Fasilitas lengkap dan pengajar berkualitas.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "reviews"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"pesantren_id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n  \"rating\": 5,\n  \"title\": \"Pesantren yang sangat bagus\",\n  \"content\": \"Saya sangat puas dengan pendidikan di pesantren ini. Fasilitas lengkap dan pengajar berkualitas.\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/reviews",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "reviews"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Ulasan berhasil dibuat\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b7\",\n    \"pesantren_id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n    \"user_id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n    \"rating\": 5,\n    \"title\": \"Pesantren yang sangat bagus\",\n    \"content\": \"Saya sangat puas dengan pendidikan di pesantren ini. Fasilitas lengkap dan pengajar berkualitas.\",\n    \"is_verified\": false,\n    \"helpful_count\": 0,\n    \"created_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Applications",
+			"item": [
+				{
+					"name": "Get All Applications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/applications?page=1&limit=10&status=&pesantren_id=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "applications"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "pesantren_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/applications?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "applications"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Daftar aplikasi berhasil diambil\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": \"60f7b3b3b3b3b3b3b3b3b3b8\",\n        \"pesantren_id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n        \"pesantren_name\": \"Pondok Pesantren Al-Hikmah\",\n        \"user_id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n        \"applicant_name\": \"Ahmad Fauzi\",\n        \"applicant_email\": \"user@example.com\",\n        \"applicant_phone\": \"+62-812-3456-7890\",\n        \"education_level\": \"SMA/MA\",\n        \"status\": \"pending\",\n        \"notes\": \"Ingin mendaftar untuk program tahfidz\",\n        \"created_at\": \"2024-01-10T08:00:00Z\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 10,\n      \"total\": 25,\n      \"total_pages\": 3,\n      \"has_next\": true,\n      \"has_prev\": false\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Application",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pesantren_id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n  \"applicant_name\": \"Ahmad Fauzi\",\n  \"applicant_email\": \"user@example.com\",\n  \"applicant_phone\": \"+62-812-3456-7890\",\n  \"education_level\": \"SMA/MA\",\n  \"notes\": \"Ingin mendaftar untuk program tahfidz\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/applications",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "applications"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"pesantren_id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n  \"applicant_name\": \"Ahmad Fauzi\",\n  \"applicant_email\": \"user@example.com\",\n  \"applicant_phone\": \"+62-812-3456-7890\",\n  \"education_level\": \"SMA/MA\",\n  \"notes\": \"Ingin mendaftar untuk program tahfidz\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/applications",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "applications"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Aplikasi berhasil dibuat\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b8\",\n    \"pesantren_id\": \"60f7b3b3b3b3b3b3b3b3b3b3\",\n    \"user_id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n    \"applicant_name\": \"Ahmad Fauzi\",\n    \"applicant_email\": \"user@example.com\",\n    \"applicant_phone\": \"+62-812-3456-7890\",\n    \"education_level\": \"SMA/MA\",\n    \"status\": \"pending\",\n    \"notes\": \"Ingin mendaftar untuk program tahfidz\",\n    \"created_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Consultations",
+			"item": [
+				{
+					"name": "Get All Consultations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/consultations?page=1&limit=10&status=&category=",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "consultations"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": ""
+								},
+								{
+									"key": "category",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/consultations?page=1&limit=10",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "consultations"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Daftar konsultasi berhasil diambil\",\n  \"data\": {\n    \"data\": [\n      {\n        \"id\": \"60f7b3b3b3b3b3b3b3b3b3b9\",\n        \"user_id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n        \"user_name\": \"Ahmad Fauzi\",\n        \"category\": \"Pendidikan\",\n        \"subject\": \"Konsultasi pemilihan pesantren\",\n        \"message\": \"Saya ingin berkonsultasi tentang pemilihan pesantren yang tepat untuk anak saya\",\n        \"status\": \"pending\",\n        \"priority\": \"medium\",\n        \"created_at\": \"2024-01-10T08:00:00Z\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 10,\n      \"total\": 15,\n      \"total_pages\": 2,\n      \"has_next\": true,\n      \"has_prev\": false\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Consultation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{user_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"category\": \"Pendidikan\",\n  \"subject\": \"Konsultasi pemilihan pesantren\",\n  \"message\": \"Saya ingin berkonsultasi tentang pemilihan pesantren yang tepat untuk anak saya\",\n  \"priority\": \"medium\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/consultations",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "consultations"]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{user_token}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"category\": \"Pendidikan\",\n  \"subject\": \"Konsultasi pemilihan pesantren\",\n  \"message\": \"Saya ingin berkonsultasi tentang pemilihan pesantren yang tepat untuk anak saya\",\n  \"priority\": \"medium\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/consultations",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "consultations"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Konsultasi berhasil dibuat\",\n  \"data\": {\n    \"id\": \"60f7b3b3b3b3b3b3b3b3b3b9\",\n    \"user_id\": \"60f7b3b3b3b3b3b3b3b3b3b5\",\n    \"category\": \"Pendidikan\",\n    \"subject\": \"Konsultasi pemilihan pesantren\",\n    \"message\": \"Saya ingin berkonsultasi tentang pemilihan pesantren yang tepat untuk anak saya\",\n    \"status\": \"pending\",\n    \"priority\": \"medium\",\n    \"created_at\": \"2024-01-15T10:30:00Z\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:00Z\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "pesantren_id",
+			"value": "60f7b3b3b3b3b3b3b3b3b3b3",
+			"type": "string"
+		},
+		{
+			"key": "news_id",
+			"value": "60f7b3b3b3b3b3b3b3b3b3b6",
+			"type": "string"
+		}
+	]
+}
