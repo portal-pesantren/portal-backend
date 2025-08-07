@@ -108,7 +108,7 @@ class NewsService(BaseService[NewsCreateDTO, NewsModel]):
     def get_news_by_id(self, news_id: str, increment_view: bool = True) -> SuccessResponseDTO:
         """Mendapatkan berita berdasarkan ID"""
         try:
-            news = self.model.get_news_with_details(news_id)
+            news = self.model.find_by_id(news_id)
             if not news:
                 raise NotFoundException("News", news_id)
             
@@ -117,7 +117,36 @@ class NewsService(BaseService[NewsCreateDTO, NewsModel]):
                 self.model.increment_view_count(news_id)
                 news["view_count"] = news.get("view_count", 0) + 1
             
-            response_data = NewsResponseDTO(**news)
+            # Map database fields to DTO fields
+            news_data = {
+                "id": news.get("id"),
+                "title": news.get("title"),
+                "slug": news.get("slug"),
+                "content": news.get("content"),
+                "excerpt": news.get("excerpt", ""),
+                "category": news.get("category"),
+                "tags": news.get("tags", []),
+                "featured_image": news.get("featured_image"),
+                "images": news.get("images", []),
+                "author_id": news.get("author_id"),
+                "author_name": news.get("author_name", ""),
+                "author_avatar": news.get("author_avatar"),
+                "pesantren_id": news.get("pesantren_id"),
+                "pesantren_name": news.get("pesantren_name"),
+                "is_published": news.get("status") == "published",
+                "is_featured": news.get("is_featured", False),
+                "publish_date": news.get("publish_date"),
+                "views": news.get("view_count", 0),  # Map view_count to views
+                "likes": news.get("likes", 0),
+                "dislikes": news.get("dislikes", 0),
+                "reading_time": news.get("reading_time", 0),
+                "meta_title": news.get("meta_title"),
+                "meta_description": news.get("meta_description"),
+                "created_at": news.get("created_at"),
+                "updated_at": news.get("updated_at")
+            }
+            
+            response_data = NewsResponseDTO(**news_data)
             
             return self.create_success_response(
                 data=response_data.dict(),
@@ -218,10 +247,10 @@ class NewsService(BaseService[NewsCreateDTO, NewsModel]):
                     query["author_id"] = filter_dto.author_id
                 if filter_dto.is_featured is not None:
                     query["is_featured"] = filter_dto.is_featured
-                if filter_dto.published_from:
-                    query["published_at"] = {"$gte": filter_dto.published_from}
-                if filter_dto.published_to:
-                    query.setdefault("published_at", {})["$lte"] = filter_dto.published_to
+                if filter_dto.publish_date_from:
+                    query["published_at"] = {"$gte": filter_dto.publish_date_from}
+                if filter_dto.publish_date_to:
+                    query.setdefault("published_at", {})["$lte"] = filter_dto.publish_date_to
             
             # Get data with pagination
             skip = (pagination_dto.page - 1) * pagination_dto.limit
@@ -250,7 +279,7 @@ class NewsService(BaseService[NewsCreateDTO, NewsModel]):
             total = self.model.count_documents(query)
             
             # Convert to response DTOs
-            response_data = [NewsSummaryDTO(**news).dict() for news in news_list]
+            response_data = [NewsSummaryDTO(**news).model_dump() for news in news_list]
             
             return self.create_paginated_response(
                 data=response_data,
@@ -273,10 +302,10 @@ class NewsService(BaseService[NewsCreateDTO, NewsModel]):
     ) -> SuccessResponseDTO:
         """Mendapatkan berita unggulan"""
         try:
-            featured_news = self.model.get_featured_news(limit)
+            featured_news = self.model.get_published_news(featured=True, limit=limit)
             
             # Convert to response DTOs
-            response_data = [NewsSummaryDTO(**news).dict() for news in featured_news]
+            response_data = [NewsSummaryDTO(**news).model_dump() for news in featured_news]
             
             return self.create_success_response(
                 data=response_data,
@@ -299,7 +328,7 @@ class NewsService(BaseService[NewsCreateDTO, NewsModel]):
             popular_news = self.model.get_popular_news(days, limit)
             
             # Convert to response DTOs
-            response_data = [NewsSummaryDTO(**news).dict() for news in popular_news]
+            response_data = [NewsSummaryDTO(**news).model_dump() for news in popular_news]
             
             return self.create_success_response(
                 data=response_data,
@@ -574,11 +603,30 @@ class NewsService(BaseService[NewsCreateDTO, NewsModel]):
                 if not user or user.get("role") not in ["admin", "editor"]:
                     raise PermissionException("view", "global news statistics")
             
-            stats = self.model.get_news_stats(author_id)
+            raw_stats = self.model.get_news_statistics(author_id)
+            
+            # Map raw stats to NewsStatsDTO format
+            stats = {
+                'total_news': raw_stats.get('total_news', 0),
+                'published_news': raw_stats.get('published', 0),
+                'draft_news': raw_stats.get('draft', 0),
+                'featured_news': raw_stats.get('featured', 0),
+                'total_views': raw_stats.get('total_views', 0),
+                'total_likes': raw_stats.get('total_likes', 0),
+                'news_today': 0,  # TODO: implement in model
+                'news_this_week': 0,  # TODO: implement in model
+                'news_this_month': 0,  # TODO: implement in model
+                'by_category': {},  # TODO: implement in model
+                'by_author': {},  # TODO: implement in model
+                'by_pesantren': {},  # TODO: implement in model
+                'trending_tags': [],  # TODO: implement in model
+                'popular_news': []  # TODO: implement in model
+            }
+            
             response_data = NewsStatsDTO(**stats)
             
             return self.create_success_response(
-                data=response_data.dict(),
+                data=response_data.model_dump(),
                 message="Statistik berita berhasil diambil"
             )
             

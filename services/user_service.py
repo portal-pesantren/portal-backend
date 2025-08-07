@@ -2,6 +2,7 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 import secrets
 from models.user import UserModel
+from services.jwt_service import JWTService
 from dto.user_dto import (
     UserCreateDTO,
     UserUpdateDTO,
@@ -13,10 +14,9 @@ from dto.user_dto import (
     UserFilterDTO,
     UserStatsDTO,
     UserLoginResponseDTO,
-    UserRegistrationDTO,
     UserVerificationDTO,
     UserForgotPasswordDTO,
-    UserResetPasswordDTO
+    UserResetPasswordDTO,
 )
 from dto.base_dto import PaginationDTO, PaginatedResponseDTO, SuccessResponseDTO
 from .base_service import BaseService
@@ -27,134 +27,250 @@ class UserService(BaseService[UserCreateDTO, UserModel]):
     
     def __init__(self):
         super().__init__(UserModel)
+        self.jwt_service = JWTService()
     
     def get_resource_name(self) -> str:
         return "User"
     
-    def register_user(self, data: Dict[str, Any]) -> SuccessResponseDTO:
+    def register_user(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Registrasi pengguna baru"""
+        # Data sudah divalidasi di router sebagai UserRegistrationDTO
+        # Hapus field yang tidak diperlukan untuk penyimpanan
+        sanitized_data = data.copy()
+        sanitized_data.pop('confirm_password', None)
+        sanitized_data.pop('terms_accepted', None)
+        
+        # Sanitize input
+        sanitized_data = self.sanitize_input(sanitized_data)
+        
+        # Check duplicate email
+        existing_email = self.model.find_one({"email": sanitized_data["email"]})
+        if existing_email:
+            raise DuplicateException("User", "email", sanitized_data["email"])
+        
+        # Check duplicate phone if provided
+        if sanitized_data.get("phone"):
+            existing_phone = self.model.find_one({"phone": sanitized_data["phone"]})
+            if existing_phone:
+                raise DuplicateException("User", "phone", sanitized_data["phone"])
+        
+        # Generate verification token
+        verification_token = secrets.token_urlsafe(32)
+        
+        # Prepare user data
+        user_data = {
+            **sanitized_data,
+            "email_verification_token": verification_token,
+            "email_verification_expires": datetime.now() + timedelta(hours=24),
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
+        }
+        
+        # Create user
+        user = self.model.create_user(user_data)
+        
+        # Remove sensitive data and fields not in DTO from response
+        user.pop("password", None)
+        user.pop("email_verification_token", None)
+        user.pop("email_verification_expires", None)
+        user.pop("preferences", None)
+        user.pop("profile", None)
+        user.pop("avatar", None)
+        
+        # Ensure all required fields for UserResponseDTO exist with proper defaults
+        required_fields = {
+            'profile_picture': None,
+            'address': None,
+            'date_of_birth': None,
+            'gender': None,
+            'occupation': None,
+            'last_login': None,
+            'is_verified': False,
+            'email_verified': False,
+            'phone_verified': False,
+            'login_count': 0
+        }
+        
+        for field, default_value in required_fields.items():
+            if field not in user:
+                user[field] = default_value
+        
+        # Debug: Print user data before DTO conversion
+        print(f"User data before DTO conversion: {user}")
+        
+        # Log activity
+        self.log_activity(user["id"], "register", "user", user["id"])
+        
+        # Convert to response DTO - only include fields that exist in UserResponseDTO
+        user_response_data = {
+            'id': user.get('id'),
+            'name': user.get('name'),
+            'email': user.get('email'),
+            'phone': user.get('phone'),
+            'role': user.get('role'),
+            'profile_picture': user.get('profile_picture'),
+            'address': user.get('address'),
+            'date_of_birth': user.get('date_of_birth'),
+            'gender': user.get('gender'),
+            'occupation': user.get('occupation'),
+            'is_active': user.get('is_active', True),
+            'is_verified': user.get('is_verified', False),
+            'email_verified': user.get('email_verified', False),
+            'phone_verified': user.get('phone_verified', False),
+            'last_login': user.get('last_login'),
+            'login_count': user.get('login_count', 0),
+            'created_at': user.get('created_at'),
+            'updated_at': user.get('updated_at')
+        }
+        
+        response_data = UserResponseDTO(**user_response_data)
+        
+        # Generate JWT tokens for registered user
+        access_token = self.jwt_service.create_access_token(user)
+        refresh_token = self.jwt_service.create_refresh_token(user)
+        
+        return {
+            "user": response_data.dict(),
+            "verification_token": verification_token,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "expires_in": self.jwt_service.access_token_expire_minutes * 60,
+            "token_type": "Bearer"
+        }
+    
+    def login_user(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Login pengguna"""
+        # Validasi input
+        login_dto = self.validate_dto(UserLoginDTO, data)
+        
+        # Authenticate user
+        user = self.model.authenticate_user(login_dto.email, login_dto.password)
+        if not user:
+            raise ValidationException("Email atau password tidak valid")
+        
+        # Check if user is active
+        if not user.get("is_active", True):
+            raise ValidationException("Akun Anda telah dinonaktifkan")
+        
+        # Store user_id before any modifications
+        user_id = user["id"]
+        
+        # Update last login
+        self.model.update_by_id(user_id, {
+            "last_login": datetime.now(),
+            "login_count": user.get("login_count", 0) + 1
+        })
+        
+        # Prepare user data for DTO (id already converted by base model)
+        user_data = user.copy()
+        
+        # Generate JWT tokens
+        access_token = self.jwt_service.create_access_token(user_data)
+        refresh_token = self.jwt_service.create_refresh_token(user_data)
+        
+        # Log activity
+        self.log_activity(user_id, "login", "user", user_id)
+        
+        # Ensure required fields exist with defaults
+        user_data.setdefault("is_verified", False)
+        user_data.setdefault("created_at", user_data.get("created_at", datetime.now()))
+        user_data.setdefault("profile_picture", None)
+        
+        # Prepare response
+        user_profile = UserProfileDTO(**user_data)
+        login_response = UserLoginResponseDTO(
+            user=user_profile,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expires_in=self.jwt_service.access_token_expire_minutes * 60,  # Convert minutes to seconds
+            token_type="Bearer"
+        )
+        
+        return login_response.dict()
+    
+    def refresh_token(self, refresh_token: str) -> Dict[str, Any]:
+        """Refresh access token menggunakan refresh token"""
         try:
-            # Validasi input menggunakan DTO
-            register_dto = self.validate_dto(UserRegistrationDTO, data)
+            # Generate new access token
+            new_access_token = self.jwt_service.refresh_access_token(refresh_token)
             
-            # Sanitize input
-            sanitized_data = self.sanitize_input(register_dto.dict())
+            # Get user data from refresh token
+            payload = self.jwt_service.verify_token(refresh_token, "refresh")
+            user_id = payload.get("user_id")
             
-            # Check duplicate email
-            existing_email = self.model.find_one({"email": sanitized_data["email"]})
-            if existing_email:
-                raise DuplicateException("User", "email", sanitized_data["email"])
+            # Get updated user data
+            user = self.model.find_by_id(user_id)
+            if not user:
+                raise ValidationException("User tidak ditemukan")
             
-            # Check duplicate phone if provided
-            if sanitized_data.get("phone"):
-                existing_phone = self.model.find_one({"phone": sanitized_data["phone"]})
-                if existing_phone:
-                    raise DuplicateException("User", "phone", sanitized_data["phone"])
+            # Check if user is still active
+            if not user.get("is_active", True):
+                raise ValidationException("Akun telah dinonaktifkan")
             
-            # Generate verification token
-            verification_token = secrets.token_urlsafe(32)
+            # Log activity
+            self.log_activity(user_id, "refresh_token", "user", user_id)
             
-            # Prepare user data
-            user_data = {
-                "name": sanitized_data["name"],
-                "email": sanitized_data["email"],
-                "phone": sanitized_data.get("phone"),
-                "password": sanitized_data["password"],  # Will be hashed in model
-                "role": sanitized_data.get("role", "parent"),
-                "is_active": True,
-                "is_email_verified": False,
-                "is_phone_verified": False,
-                "email_verification_token": verification_token,
-                "email_verification_expires": datetime.now() + timedelta(hours=24),
-                "created_at": datetime.now(),
-                "updated_at": datetime.now()
+            return {
+                "access_token": new_access_token,
+                "expires_in": self.jwt_service.access_token_expire_minutes * 60,
+                "token_type": "Bearer"
             }
             
-            # Create user
-            user = self.model.create_user(user_data)
+        except ValidationException as e:
+            raise e
+        except Exception as e:
+            raise ValidationException(f"Gagal refresh token: {str(e)}")
+    
+    def logout_user(self, user_id: str) -> Dict[str, Any]:
+        """Logout pengguna (untuk logging purposes)"""
+        try:
+            # Log activity
+            self.log_activity(user_id, "logout", "user", user_id)
             
-            # Remove sensitive data from response
+            return {
+                "message": "Logout berhasil"
+            }
+            
+        except Exception as e:
+            raise ValidationException(f"Gagal logout: {str(e)}")
+    
+    def verify_token(self, token: str) -> Dict[str, Any]:
+        """Verifikasi JWT token"""
+        try:
+            payload = self.jwt_service.verify_token(token, "access")
+            
+            # Get user data
+            user_id = payload.get("user_id")
+            user = self.model.find_by_id(user_id)
+            
+            if not user:
+                raise ValidationException("User tidak ditemukan")
+            
+            if not user.get("is_active", True):
+                raise ValidationException("Akun telah dinonaktifkan")
+            
+            # Remove sensitive data
             user.pop("password", None)
             user.pop("email_verification_token", None)
+            user.pop("phone_verification_token", None)
+            user.pop("password_reset_token", None)
             
-            # Log activity
-            self.log_activity(user["_id"], "register", "user", user["_id"])
-            
-            # Convert to response DTO
-            response_data = UserResponseDTO(**user)
-            
-            return self.create_success_response(
-                data=response_data.dict(),
-                message="Registrasi berhasil. Silakan cek email untuk verifikasi.",
-                meta={"verification_token": verification_token}  # For testing purposes
-            )
+            return {
+                "valid": True,
+                "user": user,
+                "payload": payload
+            }
             
         except ValidationException as e:
-            return self.create_validation_error_response(e.errors)
-        except DuplicateException as e:
-            return self.handle_service_exception(e)
+            return {
+                "valid": False,
+                "error": str(e)
+            }
         except Exception as e:
-            return self.create_error_response(
-                message="Gagal melakukan registrasi",
-                code="REGISTRATION_ERROR"
-            )
-    
-    def login_user(self, data: Dict[str, Any]) -> SuccessResponseDTO:
-        """Login pengguna"""
-        try:
-            # Validasi input
-            login_dto = self.validate_dto(UserLoginDTO, data)
-            
-            # Authenticate user
-            user = self.model.authenticate_user(login_dto.email, login_dto.password)
-            if not user:
-                return self.create_error_response(
-                    message="Email atau password tidak valid",
-                    code="INVALID_CREDENTIALS"
-                )
-            
-            # Check if user is active
-            if not user.get("is_active", True):
-                return self.create_error_response(
-                    message="Akun Anda telah dinonaktifkan",
-                    code="ACCOUNT_DISABLED"
-                )
-            
-            # Update last login
-            self.model.update_by_id(user["_id"], {
-                "last_login": datetime.now(),
-                "login_count": user.get("login_count", 0) + 1
-            })
-            
-            # Generate access token (simplified - in real app use JWT)
-            access_token = secrets.token_urlsafe(32)
-            refresh_token = secrets.token_urlsafe(32)
-            
-            # Log activity
-            self.log_activity(user["_id"], "login", "user", user["_id"])
-            
-            # Prepare response
-            user_profile = UserProfileDTO(**user)
-            login_response = UserLoginResponseDTO(
-                user=user_profile,
-                access_token=access_token,
-                refresh_token=refresh_token,
-                expires_in=3600,  # 1 hour
-                token_type="Bearer"
-            )
-            
-            return self.create_success_response(
-                data=login_response.dict(),
-                message="Login berhasil"
-            )
-            
-        except ValidationException as e:
-            return self.create_validation_error_response(e.errors)
-        except Exception as e:
-            return self.create_error_response(
-                message="Gagal melakukan login",
-                code="LOGIN_ERROR"
-            )
+            return {
+                "valid": False,
+                "error": f"Token verification failed: {str(e)}"
+            }
     
     def get_user_profile(self, user_id: str) -> SuccessResponseDTO:
         """Mendapatkan profil pengguna"""

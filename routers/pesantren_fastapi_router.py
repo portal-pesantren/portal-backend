@@ -61,8 +61,38 @@ async def get_pesantren_list(
             }
         }
         
-        return await router_instance.get_pesantren_list(context)
+        # Use handle_request method instead of calling get_pesantren_list directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/pesantren",
+            data={},
+            headers={"Content-Type": "application/json"},
+            query_params={
+                "page": str(page),
+                "limit": str(limit),
+                "search": search,
+                "location": location,
+                "category": category,
+                "is_active": str(is_active) if is_active is not None else None
+            }
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+        raise
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @pesantren_router.get("/pesantren/featured")
@@ -78,8 +108,31 @@ async def get_featured_pesantren(
             "query_params": {"limit": limit}
         }
         
-        return await router_instance.get_featured_pesantren(context)
+        # Use handle_request method instead of calling get_featured_pesantren directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/pesantren/featured",
+            data={},
+            headers={"Content-Type": "application/json"},
+            query_params={"limit": str(limit)}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+        raise
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @pesantren_router.get("/pesantren/popular")
@@ -95,8 +148,28 @@ async def get_popular_pesantren(
             "query_params": {"limit": limit}
         }
         
-        return await router_instance.get_popular_pesantren(context)
+        # Use handle_request method instead of calling get_popular_pesantren directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/pesantren/popular",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @pesantren_router.get("/pesantren/stats")
@@ -106,8 +179,28 @@ async def get_pesantren_stats():
         from routers.pesantren_router import PesantrenRouter
         router_instance = PesantrenRouter()
         
-        return await router_instance.get_pesantren_stats({})
+        # Use handle_request method instead of calling get_pesantren_stats directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/pesantren/stats",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @pesantren_router.get("/pesantren/{pesantren_id}")
@@ -117,8 +210,28 @@ async def get_pesantren_by_id(pesantren_id: str):
         from routers.pesantren_router import PesantrenRouter
         router_instance = PesantrenRouter()
         
-        return await router_instance.get_pesantren_by_id(pesantren_id, {})
+        # Use handle_request method instead of calling get_pesantren_by_id directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-pesantren-by-id",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @pesantren_router.post("/pesantren")
@@ -132,8 +245,28 @@ async def create_pesantren(request: PesantrenCreateRequest):
             "data": request.dict()
         }
         
-        return await router_instance.create_pesantren(context)
+        # Use handle_request method instead of calling create_pesantren directly
+        response = router_instance.handle_request(
+            method="POST",
+            path="/create-pesantren",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @pesantren_router.put("/pesantren/{pesantren_id}")
@@ -147,8 +280,28 @@ async def update_pesantren(pesantren_id: str, request: PesantrenUpdateRequest):
             "data": request.dict(exclude_unset=True)
         }
         
-        return await router_instance.update_pesantren(pesantren_id, context)
+        # Use handle_request method instead of calling update_pesantren directly
+        response = router_instance.handle_request(
+            method="PUT",
+            path="/update-pesantren",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @pesantren_router.patch("/pesantren/{pesantren_id}/featured")
@@ -162,8 +315,28 @@ async def set_pesantren_featured(pesantren_id: str, request: FeaturedRequest):
             "data": request.dict()
         }
         
-        return await router_instance.set_pesantren_featured(pesantren_id, context)
+        # Use handle_request method instead of calling set_pesantren_featured directly
+        response = router_instance.handle_request(
+            method="PATCH",
+            path="/set-pesantren-featured",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @pesantren_router.delete("/pesantren/{pesantren_id}")
@@ -173,6 +346,26 @@ async def delete_pesantren(pesantren_id: str):
         from routers.pesantren_router import PesantrenRouter
         router_instance = PesantrenRouter()
         
-        return await router_instance.delete_pesantren(pesantren_id, {})
+        # Use handle_request method instead of calling delete_pesantren directly
+        response = router_instance.handle_request(
+            method="DELETE",
+            path="/delete-pesantren",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))

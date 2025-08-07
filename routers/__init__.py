@@ -1,6 +1,6 @@
 # Routers Layer
 from .base_router import BaseRouter
-from .user_router import UserRouter
+from .user_fastapi_router import user_router
 # from .review_router import ReviewRouter  # Converted to FastAPI APIRouter
 from .application_router import ApplicationRouter
 # from .news_router import NewsRouter  # Converted to FastAPI APIRouter

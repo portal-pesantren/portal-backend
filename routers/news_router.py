@@ -73,7 +73,8 @@ def get_news_list(
         
         return {
             "success": True,
-            "data": result,
+            "data": result.data,
+            "pagination": result.pagination,
             "message": "Daftar berita berhasil diambil"
         }
         
@@ -138,9 +139,13 @@ def get_news_by_id(news_id: str):
         if not result:
             raise HTTPException(status_code=404, detail="Berita tidak ditemukan")
         
+        # Check if result is an error response
+        if hasattr(result, 'success') and not result.success:
+            raise HTTPException(status_code=404, detail=result.error)
+        
         return {
             "success": True,
-            "data": result,
+            "data": result.data,
             "message": "Detail berita berhasil diambil"
         }
         

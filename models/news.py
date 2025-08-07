@@ -47,14 +47,8 @@ class NewsModel(BaseModel):
         if not self.validate_data(data):
             raise ValueError("Data news tidak valid")
         
-        # Generate slug dari title
+        # Generate slug dari title (sudah termasuk pengecekan keunikan)
         slug = self._generate_slug(data['title'])
-        
-        # Cek apakah slug sudah ada
-        existing_news = self.find_one({'slug': slug})
-        if existing_news:
-            # Tambahkan timestamp untuk membuat slug unik
-            slug = f"{slug}-{int(datetime.utcnow().timestamp())}"
         
         # Set default values
         defaults = {
@@ -82,9 +76,9 @@ class NewsModel(BaseModel):
         
         return self.create(data)
     
-    def _generate_slug(self, title: str) -> str:
+    def _generate_base_slug(self, title: str) -> str:
         """
-        Generate slug dari title
+        Generate base slug dari title tanpa pengecekan keunikan
         """
         # Lowercase dan replace spasi dengan dash
         slug = title.lower()
@@ -96,6 +90,21 @@ class NewsModel(BaseModel):
         slug = re.sub(r'-+', '-', slug)
         # Hapus dash di awal dan akhir
         slug = slug.strip('-')
+        
+        return slug
+    
+    def _generate_slug(self, title: str) -> str:
+        """
+        Generate slug dari title dengan pengecekan keunikan
+        """
+        base_slug = self._generate_base_slug(title)
+        
+        # Cek keunikan slug dan tambahkan counter jika perlu
+        slug = base_slug
+        counter = 1
+        while self.find_one({"slug": slug}):
+            slug = f"{base_slug}-{counter}"
+            counter += 1
         
         return slug
     
@@ -165,7 +174,7 @@ class NewsModel(BaseModel):
             filter_dict['category'] = category
         
         if featured is not None:
-            filter_dict['featured'] = featured
+            filter_dict['is_featured'] = featured
         
         return self.find_many(filter_dict, [('published_date', -1)], limit, skip)
     
@@ -274,14 +283,19 @@ class NewsModel(BaseModel):
         
         # Update slug jika title berubah
         if 'title' in update_data:
-            new_slug = self._generate_slug(update_data['title'])
-            # Cek apakah slug sudah ada (kecuali untuk news ini sendiri)
-            existing_news = self.find_one({
-                'slug': new_slug,
-                'id': {'$ne': news_id}
-            })
-            if existing_news:
-                new_slug = f"{new_slug}-{int(datetime.utcnow().timestamp())}"
+            # Generate slug baru dengan pengecekan keunikan (exclude current news)
+            base_slug = self._generate_base_slug(update_data['title'])
+            new_slug = base_slug
+            counter = 1
+            while True:
+                existing_news = self.find_one({
+                    'slug': new_slug,
+                    'id': {'$ne': news_id}
+                })
+                if not existing_news:
+                    break
+                new_slug = f"{base_slug}-{counter}"
+                counter += 1
             update_data['slug'] = new_slug
         
         # Update reading time jika content berubah
@@ -297,10 +311,32 @@ class NewsModel(BaseModel):
         
         return self.update_by_id(news_id, update_data)
     
-    def search_news(self, query: str, category: str = None, tags: List[str] = None,
+    def search_news(self, query: Dict[str, Any] = None, skip: int = 0, 
+                   limit: int = 20, sort: List[tuple] = None) -> List[Dict[str, Any]]:
+        """
+        Pencarian news berdasarkan query dict dengan pagination dan sorting
+        """
+        if query is None:
+            query = {}
+        
+        # Default sort jika tidak ada
+        if sort is None:
+            sort = [('published_at', -1)]
+        
+        return self.find_many(query, sort, limit, skip)
+    
+    def count_documents(self, query: Dict[str, Any] = None) -> int:
+        """
+        Menghitung jumlah dokumen berdasarkan query
+        """
+        if query is None:
+            query = {}
+        return self.count(query)
+    
+    def search_news_by_text(self, query: str, category: str = None, tags: List[str] = None,
                    limit: int = 20) -> List[Dict[str, Any]]:
         """
-        Pencarian news berdasarkan title, content, atau tags
+        Pencarian news berdasarkan title, content, atau tags (method lama)
         """
         filter_dict = {
             '$or': [
@@ -317,7 +353,7 @@ class NewsModel(BaseModel):
         if tags:
             filter_dict['tags'] = {'$in': tags}
         
-        return self.find_many(filter_dict, [('published_date', -1)], limit)
+        return self.find_many(filter_dict, [('published_at', -1)], limit)
     
     def get_popular_news(self, days: int = 30, limit: int = 10) -> List[Dict[str, Any]]:
         """

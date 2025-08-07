@@ -67,8 +67,28 @@ async def get_reviews_list(
             }
         }
         
-        return await router_instance.get_reviews_list(context)
+        # Use handle_request method instead of calling get_reviews_list directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-reviews-list",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.get("/reviews/pesantren/{pesantren_id}")
@@ -93,8 +113,28 @@ async def get_reviews_by_pesantren(
             }
         }
         
-        return await router_instance.get_reviews_by_pesantren(pesantren_id, context)
+        # Use handle_request method instead of calling get_reviews_by_pesantren directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-reviews-by-pesantren",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.get("/reviews/user/{user_id}")
@@ -115,8 +155,28 @@ async def get_reviews_by_user(
             }
         }
         
-        return await router_instance.get_reviews_by_user(user_id, context)
+        # Use handle_request method instead of calling get_reviews_by_user directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-reviews-by-user",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.get("/reviews/stats")
@@ -134,8 +194,28 @@ async def get_review_stats(
             }
         }
         
-        return await router_instance.get_review_stats(context)
+        # Use handle_request method instead of calling get_review_stats directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-review-stats",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.get("/reviews/{review_id}")
@@ -145,8 +225,28 @@ async def get_review_by_id(review_id: str):
         from routers.review_router import ReviewRouter
         router_instance = ReviewRouter()
         
-        return await router_instance.get_review_by_id(review_id, {})
+        # Use handle_request method instead of calling get_review_by_id directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-review-by-id",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.post("/reviews")
@@ -160,8 +260,28 @@ async def create_review(request: ReviewCreateRequest):
             "data": request.dict()
         }
         
-        return await router_instance.create_review(context)
+        # Use handle_request method instead of calling create_review directly
+        response = router_instance.handle_request(
+            method="POST",
+            path="/create-review",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.put("/reviews/{review_id}")
@@ -175,8 +295,28 @@ async def update_review(review_id: str, request: ReviewUpdateRequest):
             "data": request.dict(exclude_unset=True)
         }
         
-        return await router_instance.update_review(review_id, context)
+        # Use handle_request method instead of calling update_review directly
+        response = router_instance.handle_request(
+            method="PUT",
+            path="/update-review",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.post("/reviews/{review_id}/helpful")
@@ -190,8 +330,28 @@ async def mark_review_helpful(review_id: str, request: ReviewHelpfulRequest):
             "data": request.dict()
         }
         
-        return await router_instance.mark_review_helpful(review_id, context)
+        # Use handle_request method instead of calling mark_review_helpful directly
+        response = router_instance.handle_request(
+            method="PATCH",
+            path="/mark-review-helpful",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.post("/reviews/{review_id}/report")
@@ -205,8 +365,28 @@ async def report_review(review_id: str, request: ReviewReportRequest):
             "data": request.dict()
         }
         
-        return await router_instance.report_review(review_id, context)
+        # Use handle_request method instead of calling report_review directly
+        response = router_instance.handle_request(
+            method="PATCH",
+            path="/report-review",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.patch("/reviews/{review_id}/moderate")
@@ -220,8 +400,28 @@ async def moderate_review(review_id: str, request: ReviewModerationRequest):
             "data": request.dict()
         }
         
-        return await router_instance.moderate_review(review_id, context)
+        # Use handle_request method instead of calling moderate_review directly
+        response = router_instance.handle_request(
+            method="PATCH",
+            path="/moderate-review",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @review_router.delete("/reviews/{review_id}")
@@ -231,6 +431,26 @@ async def delete_review(review_id: str):
         from routers.review_router import ReviewRouter
         router_instance = ReviewRouter()
         
-        return await router_instance.delete_review(review_id, {})
+        # Use handle_request method instead of calling delete_review directly
+        response = router_instance.handle_request(
+            method="DELETE",
+            path="/delete-review",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))

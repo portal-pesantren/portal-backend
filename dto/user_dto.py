@@ -1,5 +1,7 @@
+import re
+
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, field_validator, field_validator, EmailStr
+from pydantic import BaseModel, Field, field_validator, model_validator, EmailStr
 from datetime import datetime
 from .base_dto import BaseResponseDTO, SearchDTO, FilterDTO
 
@@ -8,7 +10,7 @@ class UserCreateDTO(BaseModel):
     name: str = Field(..., min_length=2, max_length=100, description="Nama lengkap")
     email: EmailStr = Field(..., description="Email")
     password: str = Field(..., min_length=8, description="Password")
-    phone: str = Field(..., min_length=10, max_length=15, description="Nomor telepon")
+    phone: str = Field(..., min_length=10, max_length=20, description="Nomor telepon")
     role: str = Field("parent", description="Role user")
     profile_picture: Optional[str] = Field(None, description="URL foto profil")
     address: Optional[str] = Field(None, description="Alamat")
@@ -32,16 +34,21 @@ class UserCreateDTO(BaseModel):
     @field_validator('phone')
     def validate_phone(cls, v):
         # Validasi format nomor telepon Indonesia
-        import re
+        # Hapus karakter non-digit kecuali + di awal untuk validasi
+        print(f"DEBUG: Original phone: {v}")
+        clean_phone = re.sub(r'[^\d\+]', '', v)
+        print(f"DEBUG: Cleaned phone: {clean_phone}")
         pattern = r'^(\+62|62|0)[0-9]{9,13}$'
-        if not re.match(pattern, v):
-            raise ValueError('Format nomor telepon tidak valid')
+        match_result = re.match(pattern, clean_phone)
+        print(f"DEBUG: Pattern match: {bool(match_result)}")
+        if not match_result:
+            raise ValueError(f'Format nomor telepon tidak valid. Input: {v}, Cleaned: {clean_phone}')
         return v
 
 class UserUpdateDTO(BaseModel):
     """DTO untuk update user"""
     name: Optional[str] = Field(None, min_length=2, max_length=100, description="Nama lengkap")
-    phone: Optional[str] = Field(None, min_length=10, max_length=15, description="Nomor telepon")
+    phone: Optional[str] = Field(None, min_length=10, max_length=20, description="Nomor telepon")
     profile_picture: Optional[str] = Field(None, description="URL foto profil")
     address: Optional[str] = Field(None, description="Alamat")
     date_of_birth: Optional[datetime] = Field(None, description="Tanggal lahir")
@@ -58,10 +65,17 @@ class UserUpdateDTO(BaseModel):
     @field_validator('phone')
     def validate_phone(cls, v):
         if v:
-            import re
+            # Hapus karakter non-digit kecuali + di awal untuk validasi
+            print(f"DEBUG UserUpdate: Original phone: {v}")
+            clean_phone = re.sub(r'[^\d\+]', '', v)
+            print(f"DEBUG UserUpdate: Cleaned phone: {clean_phone}")
             pattern = r'^(\+62|62|0)[0-9]{9,13}$'
-            if not re.match(pattern, v):
-                raise ValueError('Format nomor telepon tidak valid')
+            match_result = re.match(pattern, clean_phone)
+            print(f"DEBUG UserUpdate: Pattern match: {bool(match_result)}")
+            if not match_result:
+                raise ValueError(f'Format nomor telepon tidak valid. Input: {v}, Cleaned: {clean_phone}')
+            # Return the cleaned phone number
+            return clean_phone
         return v
 
 class UserPasswordUpdateDTO(BaseModel):
@@ -76,6 +90,26 @@ class UserPasswordUpdateDTO(BaseModel):
             raise ValueError('Konfirmasi password tidak cocok')
         return v
 
+class RefreshTokenDTO(BaseModel):
+    """DTO untuk refresh token"""
+    refresh_token: str = Field(..., description="Refresh token")
+
+class TokenVerificationDTO(BaseModel):
+    """DTO untuk verifikasi token"""
+    token: str = Field(..., description="JWT token yang akan diverifikasi")
+
+class TokenResponseDTO(BaseModel):
+    """DTO untuk response token"""
+    access_token: str = Field(..., description="Access token")
+    expires_in: int = Field(..., description="Waktu kedaluwarsa dalam detik")
+    token_type: str = Field(default="Bearer", description="Tipe token")
+
+class TokenVerificationResponseDTO(BaseModel):
+    """DTO untuk response verifikasi token"""
+    valid: bool = Field(..., description="Status validitas token")
+    user: Optional["UserProfileDTO"] = Field(None, description="Data user jika token valid")
+    error: Optional[str] = Field(None, description="Pesan error jika token tidak valid")
+
 class UserLoginDTO(BaseModel):
     """DTO untuk login user"""
     email: EmailStr = Field(..., description="Email")
@@ -86,28 +120,28 @@ class UserResponseDTO(BaseResponseDTO):
     """DTO untuk response user"""
     name: str = Field(description="Nama lengkap")
     email: str = Field(description="Email")
-    phone: str = Field(description="Nomor telepon")
+    phone: Optional[str] = Field(default=None, description="Nomor telepon")
     role: str = Field(description="Role user")
-    profile_picture: Optional[str] = Field(description="URL foto profil")
-    address: Optional[str] = Field(description="Alamat")
-    date_of_birth: Optional[datetime] = Field(description="Tanggal lahir")
-    gender: Optional[str] = Field(description="Jenis kelamin")
-    occupation: Optional[str] = Field(description="Pekerjaan")
+    profile_picture: Optional[str] = Field(default=None, description="URL foto profil")
+    address: Optional[str] = Field(default=None, description="Alamat")
+    date_of_birth: Optional[datetime] = Field(default=None, description="Tanggal lahir")
+    gender: Optional[str] = Field(default=None, description="Jenis kelamin")
+    occupation: Optional[str] = Field(default=None, description="Pekerjaan")
     is_active: bool = Field(description="Status aktif")
-    is_verified: bool = Field(description="Status verifikasi")
-    email_verified: bool = Field(description="Email terverifikasi")
-    phone_verified: bool = Field(description="Telepon terverifikasi")
-    last_login: Optional[datetime] = Field(description="Login terakhir")
-    login_count: int = Field(description="Jumlah login")
+    is_verified: Optional[bool] = Field(default=False, description="Status verifikasi")
+    email_verified: Optional[bool] = Field(default=False, description="Email terverifikasi")
+    phone_verified: Optional[bool] = Field(default=False, description="Telepon terverifikasi")
+    last_login: Optional[datetime] = Field(default=None, description="Login terakhir")
+    login_count: Optional[int] = Field(default=0, description="Jumlah login")
     
 class UserProfileDTO(BaseModel):
     """DTO untuk profil user (tanpa data sensitif)"""
     id: str = Field(description="ID user")
     name: str = Field(description="Nama lengkap")
     email: str = Field(description="Email")
-    phone: str = Field(description="Nomor telepon")
+    phone: Optional[str] = Field(default=None, description="Nomor telepon")
     role: str = Field(description="Role user")
-    profile_picture: Optional[str] = Field(description="URL foto profil")
+    profile_picture: Optional[str] = Field(default=None, description="URL foto profil")
     is_verified: bool = Field(description="Status verifikasi")
     created_at: datetime = Field(description="Tanggal bergabung")
 
@@ -147,7 +181,7 @@ class UserStatsDTO(BaseModel):
     
 class UserLoginResponseDTO(BaseModel):
     """DTO untuk response login"""
-    user: UserProfileDTO = Field(description="Data user")
+    user: "UserProfileDTO" = Field(description="Data user")
     access_token: str = Field(description="Access token")
     refresh_token: str = Field(description="Refresh token")
     token_type: str = Field("bearer", description="Tipe token")
@@ -158,11 +192,11 @@ class UserRegistrationDTO(UserCreateDTO):
     confirm_password: str = Field(..., description="Konfirmasi password")
     terms_accepted: bool = Field(..., description="Menyetujui syarat dan ketentuan")
     
-    @field_validator('confirm_password')
-    def validate_password_match(cls, v, values):
-        if 'password' in values and v != values['password']:
+    @model_validator(mode='after')
+    def validate_password_match(self):
+        if self.password != self.confirm_password:
             raise ValueError('Konfirmasi password tidak cocok')
-        return v
+        return self
     
     @field_validator('terms_accepted')
     def validate_terms(cls, v):

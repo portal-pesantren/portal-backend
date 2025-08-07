@@ -84,8 +84,28 @@ async def get_applications_list(
             }
         }
         
-        return await router_instance.get_applications_list(context)
+        # Use handle_request method instead of calling get_applications_list directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-applications-list",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.get("/applications/pesantren/{pesantren_id}")
@@ -110,8 +130,28 @@ async def get_applications_by_pesantren(
             }
         }
         
-        return await router_instance.get_applications_by_pesantren(pesantren_id, context)
+        # Use handle_request method instead of calling get_applications_by_pesantren directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-applications-by-pesantren",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.get("/applications/user/{user_id}")
@@ -132,8 +172,28 @@ async def get_applications_by_user(
             }
         }
         
-        return await router_instance.get_applications_by_user(user_id, context)
+        # Use handle_request method instead of calling get_applications_by_user directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-applications-by-user",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.get("/applications/stats")
@@ -151,8 +211,28 @@ async def get_application_stats(
             }
         }
         
-        return await router_instance.get_application_stats(context)
+        # Use handle_request method instead of calling get_application_stats directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-application-stats",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.get("/applications/{application_id}")
@@ -162,8 +242,28 @@ async def get_application_by_id(application_id: str):
         from routers.application_router import ApplicationRouter
         router_instance = ApplicationRouter()
         
-        return await router_instance.get_application_by_id(application_id, {})
+        # Use handle_request method instead of calling get_application_by_id directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-application-by-id",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.post("/applications")
@@ -177,8 +277,28 @@ async def create_application(request: ApplicationCreateRequest):
             "data": request.dict()
         }
         
-        return await router_instance.create_application(context)
+        # Use handle_request method instead of calling create_application directly
+        response = router_instance.handle_request(
+            method="POST",
+            path="/create-application",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.put("/applications/{application_id}")
@@ -192,8 +312,28 @@ async def update_application(application_id: str, request: ApplicationUpdateRequ
             "data": request.dict(exclude_unset=True)
         }
         
-        return await router_instance.update_application(application_id, context)
+        # Use handle_request method instead of calling update_application directly
+        response = router_instance.handle_request(
+            method="PUT",
+            path="/update-application",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.patch("/applications/{application_id}/status")
@@ -207,8 +347,28 @@ async def update_application_status(application_id: str, request: ApplicationSta
             "data": request.dict()
         }
         
-        return await router_instance.update_application_status(application_id, context)
+        # Use handle_request method instead of calling update_application_status directly
+        response = router_instance.handle_request(
+            method="PUT",
+            path="/update-application-status",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.post("/applications/{application_id}/schedule-interview")
@@ -222,8 +382,28 @@ async def schedule_interview(application_id: str, request: InterviewScheduleRequ
             "data": request.dict()
         }
         
-        return await router_instance.schedule_interview(application_id, context)
+        # Use handle_request method instead of calling schedule_interview directly
+        response = router_instance.handle_request(
+            method="PATCH",
+            path="/schedule-interview",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.post("/applications/{application_id}/upload-document")
@@ -244,8 +424,28 @@ async def upload_document(
             }
         }
         
-        return await router_instance.upload_document(application_id, context)
+        # Use handle_request method instead of calling upload_document directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/upload-document",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.get("/applications/{application_id}/documents")
@@ -255,8 +455,28 @@ async def get_application_documents(application_id: str):
         from routers.application_router import ApplicationRouter
         router_instance = ApplicationRouter()
         
-        return await router_instance.get_application_documents(application_id, {})
+        # Use handle_request method instead of calling get_application_documents directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-application-documents",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @application_router.delete("/applications/{application_id}")
@@ -266,6 +486,26 @@ async def cancel_application(application_id: str):
         from routers.application_router import ApplicationRouter
         router_instance = ApplicationRouter()
         
-        return await router_instance.cancel_application(application_id, {})
+        # Use handle_request method instead of calling cancel_application directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/cancel-application",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))

@@ -38,9 +38,11 @@ class UserModel(BaseModel):
         # Validasi phone jika ada
         if 'phone' in data and data['phone']:
             phone = data['phone']
+            # Bersihkan nomor telepon dari karakter non-digit kecuali +
+            clean_phone = re.sub(r'[^+0-9]', '', phone)
             # Format phone Indonesia: +62 atau 08
             phone_pattern = r'^(\+62|62|0)8[1-9][0-9]{6,9}$'
-            if not re.match(phone_pattern, phone):
+            if not re.match(phone_pattern, clean_phone):
                 return False
         
         return True
@@ -82,10 +84,17 @@ class UserModel(BaseModel):
         # Set default values
         defaults = {
             'avatar': '',
-            'status': 'active',
+            'is_active': True,
+            'is_verified': False,
             'email_verified': False,
             'phone_verified': False,
             'last_login': None,
+            'login_count': 0,
+            'profile_picture': None,
+            'address': None,
+            'date_of_birth': None,
+            'gender': None,
+            'occupation': None,
             'preferences': {
                 'notifications': True,
                 'newsletter': True
@@ -108,9 +117,12 @@ class UserModel(BaseModel):
         """
         Autentikasi user dengan email dan password
         """
-        user = self.find_one({'email': email, 'status': 'active'})
+        user = self.find_one({'email': email, 'is_active': True})
         
-        if not user or 'password' not in user:
+        if not user:
+            return None
+            
+        if 'password' not in user:
             return None
         
         if self._verify_password(password, user['password']):

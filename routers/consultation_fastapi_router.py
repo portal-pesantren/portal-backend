@@ -80,8 +80,28 @@ async def get_consultations_list(
             }
         }
         
-        return await router_instance.get_consultations_list(context)
+        # Use handle_request method instead of calling get_consultations_list directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-consultations-list",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.get("/consultations/stats")
@@ -103,8 +123,28 @@ async def get_consultation_stats(
             }
         }
         
-        return await router_instance.get_consultation_stats(context)
+        # Use handle_request method instead of calling get_consultation_stats directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-consultation-stats",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.get("/consultations/analytics")
@@ -126,8 +166,28 @@ async def get_consultation_analytics(
             }
         }
         
-        return await router_instance.get_consultation_analytics(context)
+        # Use handle_request method instead of calling get_consultation_analytics directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-consultation-analytics",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.get("/consultations/categories")
@@ -137,8 +197,28 @@ async def get_consultation_categories():
         from routers.consultation_router import ConsultationRouter
         router_instance = ConsultationRouter()
         
-        return await router_instance.get_consultation_categories({})
+        # Use handle_request method instead of calling get_consultation_categories directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-consultation-categories",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.get("/consultations/{consultation_id}")
@@ -148,8 +228,28 @@ async def get_consultation_by_id(consultation_id: str):
         from routers.consultation_router import ConsultationRouter
         router_instance = ConsultationRouter()
         
-        return await router_instance.get_consultation_by_id(consultation_id, {})
+        # Use handle_request method instead of calling get_consultation_by_id directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-consultation-by-id",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.post("/consultations")
@@ -163,8 +263,28 @@ async def create_consultation(request: ConsultationCreateRequest):
             "data": request.dict()
         }
         
-        return await router_instance.create_consultation(context)
+        # Use handle_request method instead of calling create_consultation directly
+        response = router_instance.handle_request(
+            method="POST",
+            path="/create-consultation",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.put("/consultations/{consultation_id}")
@@ -178,8 +298,28 @@ async def update_consultation(consultation_id: str, request: ConsultationUpdateR
             "data": request.dict(exclude_unset=True)
         }
         
-        return await router_instance.update_consultation(consultation_id, context)
+        # Use handle_request method instead of calling update_consultation directly
+        response = router_instance.handle_request(
+            method="PUT",
+            path="/update-consultation",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.post("/consultations/{consultation_id}/responses")
@@ -193,8 +333,28 @@ async def create_consultation_response(consultation_id: str, request: Consultati
             "data": request.dict()
         }
         
-        return await router_instance.create_consultation_response(consultation_id, context)
+        # Use handle_request method instead of calling create_consultation_response directly
+        response = router_instance.handle_request(
+            method="POST",
+            path="/create-consultation-response",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.get("/consultations/{consultation_id}/responses")
@@ -215,8 +375,28 @@ async def get_consultation_responses(
             }
         }
         
-        return await router_instance.get_consultation_responses(consultation_id, context)
+        # Use handle_request method instead of calling get_consultation_responses directly
+        response = router_instance.handle_request(
+            method="GET",
+            path="/get-consultation-responses",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.patch("/consultations/{consultation_id}/assign")
@@ -230,8 +410,28 @@ async def assign_consultant(consultation_id: str, request: ConsultationAssignReq
             "data": request.dict()
         }
         
-        return await router_instance.assign_consultant(consultation_id, context)
+        # Use handle_request method instead of calling assign_consultant directly
+        response = router_instance.handle_request(
+            method="PATCH",
+            path="/assign-consultant",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.patch("/consultations/{consultation_id}/status")
@@ -245,8 +445,28 @@ async def update_consultation_status(consultation_id: str, request: Consultation
             "data": request.dict()
         }
         
-        return await router_instance.update_consultation_status(consultation_id, context)
+        # Use handle_request method instead of calling update_consultation_status directly
+        response = router_instance.handle_request(
+            method="PUT",
+            path="/update-consultation-status",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.post("/consultations/{consultation_id}/rating")
@@ -260,8 +480,28 @@ async def rate_consultation(consultation_id: str, request: ConsultationRatingReq
             "data": request.dict()
         }
         
-        return await router_instance.rate_consultation(consultation_id, context)
+        # Use handle_request method instead of calling rate_consultation directly
+        response = router_instance.handle_request(
+            method="PATCH",
+            path="/rate-consultation",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
 
 @consultation_router.delete("/consultations/{consultation_id}")
@@ -271,6 +511,26 @@ async def delete_consultation(consultation_id: str):
         from routers.consultation_router import ConsultationRouter
         router_instance = ConsultationRouter()
         
-        return await router_instance.delete_consultation(consultation_id, {})
+        # Use handle_request method instead of calling delete_consultation directly
+        response = router_instance.handle_request(
+            method="DELETE",
+            path="/delete-consultation",
+            data={},
+            headers={"Content-Type": "application/json"}
+        )
+        
+        # Check if response indicates an error
+        if response.get("status_code", 200) >= 400:
+            raise HTTPException(
+                status_code=response.get("status_code", 500),
+                detail=response.get("message", "Internal server error")
+            )
+        
+        return response
+    except HTTPException:
+
+        raise
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=str(e))
