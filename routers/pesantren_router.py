@@ -5,13 +5,14 @@ from fastapi import status as http_status
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from services.pesantren_service import PesantrenService
-from core.exceptions import ValidationException, ServiceException
+from core.exceptions import ValidationException, ServiceException, DuplicateException
 from dto.pesantren_dto import (
     PesantrenCreateDTO, PesantrenUpdateDTO, PesantrenSearchDTO, 
     PesantrenFilterDTO, PesantrenStatsDTO, PesantrenResponseDTO,
     PesantrenSummaryDTO
 )
 from dto.base_dto import PaginatedResponseDTO, SuccessResponseDTO
+from core.auth_middleware import require_role
 
 # Request models
 class FeaturedStatusRequest(BaseModel):
@@ -190,15 +191,33 @@ async def get_pesantren_by_id(pesantren_id: str):
         )
         
 # POST /pesantren - Create new pesantren
-@pesantren_router.post("/pesantren", status_code=http_status.HTTP_201_CREATED)
-async def create_pesantren(create_dto: PesantrenCreateDTO):
-    """Membuat pesantren baru (Admin only)"""
-    # TODO: Get user_id from authentication context
-    user_id = "admin"  # Temporary placeholder
-    
-    # Create pesantren - service handles all exceptions and returns appropriate response
-    result = pesantren_service.create_pesantren(create_dto.dict(), user_id)
-    return result
+@pesantren_router.post("/pesantren", status_code=http_status.HTTP_201_CREATED, response_model=PesantrenResponseDTO)
+async def create_pesantren(
+    create_dto: PesantrenCreateDTO,
+    # Ganti placeholder dengan dependency injection untuk autentikasi
+    current_user: dict = Depends(require_role("admin")) 
+):
+    try:
+        # Ambil ID user yang login dari token
+        user_id = current_user.get("id")
+        
+        result = pesantren_service.create_pesantren(create_dto.dict(), user_id)
+        
+        # Service sudah mengembalikan SuccessResponseDTO, kita ambil datanya
+        return result.data
+
+    except (ValidationException, DuplicateException) as e:
+        raise HTTPException(status_code=http_status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except ServiceException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
+    except Exception as e:
+        import traceback
+        logging.error(f"Error in create_pesantren: {str(e)}")
+        logging.error(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Terjadi kesalahan internal server"
+        )
 
 # PUT /pesantren/{pesantren_id} - Update pesantren
 @pesantren_router.put("/pesantren/{pesantren_id}", response_model=SuccessResponseDTO)

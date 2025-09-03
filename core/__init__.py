@@ -42,6 +42,7 @@ def create_app():
     from routers.user_fastapi_router import user_router
     from routers.application_fastapi_router import application_router
     from routers.consultation_fastapi_router import consultation_router
+    from routers.about_us_router import about_us_router
     
     app = FastAPI(
         title="Portal Pesantren API",
@@ -84,5 +85,6 @@ def create_app():
     app.include_router(application_router, prefix="/api/v1", tags=["Applications"])   
     app.include_router(news_router, prefix="/api/v1", tags=["News"])
     app.include_router(consultation_router, prefix="/api/v1", tags=["Consultations"])
+    app.include_router(about_us_router, prefix="/api/v1", tags=["About Us"])
 
     return app

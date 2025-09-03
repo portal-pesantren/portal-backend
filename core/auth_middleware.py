@@ -4,6 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from services.jwt_service import JWTService
 from models.user import UserModel
 from core.exceptions import ValidationException
+from models.token_blocklist import TokenBlocklistModel
 
 # Security scheme
 security = HTTPBearer()
@@ -11,6 +12,7 @@ security = HTTPBearer()
 # JWT Service instance
 jwt_service = JWTService()
 user_model = UserModel()
+token_blocklist_model = TokenBlocklistModel()
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
     """
@@ -26,21 +28,27 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         HTTPException: Jika token tidak valid atau user tidak ditemukan
     """
     try:
-        # Extract token
         token = credentials.credentials
-        
-        # Verify token
         payload = jwt_service.verify_token(token, "access")
         
-        # Get user from database
         user_id = payload.get("user_id")
-        if not user_id:
+        jti = payload.get("jti") # <-- 3. Ambil jti dari payload
+        
+        if not user_id or not jti: # <-- Pastikan jti ada
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token tidak valid: user_id tidak ditemukan",
+                detail="Token tidak valid: klaim tidak lengkap",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
+        # 4. PERIKSA BLOCKLIST DI SINI
+        if token_blocklist_model.is_token_blocked(jti):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token telah di-logout",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
         user = user_model.find_by_id(user_id)
         if not user:
             raise HTTPException(

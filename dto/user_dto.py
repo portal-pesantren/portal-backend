@@ -45,6 +45,11 @@ class UserCreateDTO(BaseModel):
             raise ValueError(f'Format nomor telepon tidak valid. Input: {v}, Cleaned: {clean_phone}')
         return v
 
+class ProfileUpdateDTO(BaseModel):
+    bio: Optional[str] = Field(None, description="Biografi singkat user")
+    location: Optional[str] = Field(None, description="Lokasi user")
+    children_count: Optional[int] = Field(None, ge=0, description="Jumlah anak")
+
 class UserUpdateDTO(BaseModel):
     """DTO untuk update user"""
     name: Optional[str] = Field(None, min_length=2, max_length=100, description="Nama lengkap")
@@ -55,6 +60,8 @@ class UserUpdateDTO(BaseModel):
     gender: Optional[str] = Field(None, description="Jenis kelamin")
     occupation: Optional[str] = Field(None, description="Pekerjaan")
     is_active: Optional[bool] = Field(None, description="Status aktif")
+    profile: Optional[ProfileUpdateDTO] = Field(None, description="Data profil user")
+
     
     @field_validator('gender')
     def validate_gender(cls, v):
@@ -109,6 +116,11 @@ class TokenVerificationResponseDTO(BaseModel):
     valid: bool = Field(..., description="Status validitas token")
     user: Optional["UserProfileDTO"] = Field(None, description="Data user jika token valid")
     error: Optional[str] = Field(None, description="Pesan error jika token tidak valid")
+    
+class SearchDTO(BaseModel):
+    query: Optional[str] = Field(None, description="Kata kunci pencarian umum")
+    sort_by: Optional[str] = Field(None, description="Field untuk sorting")
+    sort_order: Optional[str] = Field("desc", pattern="^(asc|desc)$", description="Urutan sorting")
 
 class UserLoginDTO(BaseModel):
     """DTO untuk login user"""
@@ -142,8 +154,17 @@ class UserProfileDTO(BaseModel):
     phone: Optional[str] = Field(default=None, description="Nomor telepon")
     role: str = Field(description="Role user")
     profile_picture: Optional[str] = Field(default=None, description="URL foto profil")
+    is_active: bool = Field(description="Status aktif")
     is_verified: bool = Field(description="Status verifikasi")
     created_at: datetime = Field(description="Tanggal bergabung")
+    last_login: Optional[datetime] = Field(default=None, description="Login terakhir")
+
+class UserPaginatedResponseDTO(BaseModel):
+    """DTO untuk response paginasi daftar user"""
+    data: List[UserProfileDTO]
+    total: int
+    page: int
+    limit: int
 
 class UserSearchDTO(SearchDTO):
     """DTO untuk pencarian user"""

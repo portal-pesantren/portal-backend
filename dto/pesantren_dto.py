@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, ConfigDict
 from datetime import datetime
 from .base_dto import BaseResponseDTO, SearchDTO, FilterDTO, LocationDTO, ContactDTO
 
@@ -82,21 +82,37 @@ class PesantrenResponseDTO(BaseResponseDTO):
     video_url: Optional[str] = Field(description="URL video profil")
     established_year: int = Field(description="Tahun berdiri")
     accreditation: Optional[str] = Field(description="Akreditasi")
-    rating: float = Field(description="Rating pesantren")
-    total_reviews: int = Field(description="Total ulasan")
+
+    # PERBAIKAN DI SINI: Gunakan alias untuk memetakan nama field
+    rating: float = Field(description="Rating pesantren", alias="rating_average")
+    total_reviews: int = Field(description="Total ulasan", alias="rating_count")
+    views: int = Field(description="Jumlah views", alias="view_count")
+
     is_featured: bool = Field(description="Status unggulan")
     is_active: bool = Field(description="Status aktif")
-    views: int = Field(description="Jumlah views")
+
+    # Tambahkan konfigurasi ini agar Pydantic bisa menggunakan alias
+    model_config = ConfigDict(
+        populate_by_name=True,
+    )
     
 class PesantrenSummaryDTO(BaseModel):
     """DTO untuk summary pesantren (untuk list)"""
     id: str = Field(description="ID pesantren")
     name: str = Field(description="Nama pesantren")
-    slug: str = Field(description="Slug pesantren")
-    location: Dict[str, str] = Field(description="Lokasi singkat")
+    
+    # Izinkan slug bernilai None jika tidak ada di DB
+    slug: Optional[str] = Field(None, description="Slug pesantren")
+    
+    # Izinkan nilai di dalam dictionary location untuk menjadi None
+    location: Dict[str, Optional[str]] = Field(description="Lokasi singkat")
+    
     monthly_fee: float = Field(description="Biaya bulanan")
-    rating: float = Field(description="Rating pesantren")
-    total_reviews: int = Field(description="Total ulasan")
+    
+    # Izinkan field rating bernilai None jika tidak ada di DB
+    rating_average: Optional[float] = Field(None, description="Rating pesantren") 
+    rating_count: Optional[int] = Field(None, description="Total ulasan")
+    
     is_featured: bool = Field(description="Status unggulan")
     images: List[str] = Field(description="URL gambar pesantren")
     programs: List[str] = Field(description="Program pendidikan")

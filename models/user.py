@@ -5,6 +5,16 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta
 
+def flatten_dict(d, parent_key='', sep='.'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
 class UserModel(BaseModel):
     """
     Model untuk data User
@@ -84,7 +94,7 @@ class UserModel(BaseModel):
         # Set default values
         defaults = {
             'avatar': '',
-            'is_active': True,
+            'is_active': False,
             'is_verified': False,
             'email_verified': False,
             'phone_verified': False,
@@ -186,29 +196,35 @@ class UserModel(BaseModel):
     
     def update_profile(self, user_id: str, profile_data: Dict[str, Any]) -> bool:
         """
-        Update profil user
+        Update profil user dengan dot notation untuk nested objects.
         """
         allowed_fields = ['name', 'phone', 'avatar', 'profile', 'preferences']
         
         # Filter hanya field yang diizinkan
-        update_data = {k: v for k, v in profile_data.items() if k in allowed_fields}
+        filtered_data = {k: v for k, v in profile_data.items() if k in allowed_fields and v is not None}
         
-        if not update_data:
+        if not filtered_data:
+            return False
+            
+        # Ubah data menjadi format dot notation (e.g., {"profile": {"bio": "..."}} -> {"profile.bio": "..."})
+        update_data_flattened = flatten_dict(filtered_data)
+        
+        if not update_data_flattened:
             return False
         
-        return self.update_by_id(user_id, update_data)
+        return self.update_by_id(user_id, update_data_flattened)
     
     def deactivate_user(self, user_id: str) -> bool:
         """
         Nonaktifkan user
         """
-        return self.update_by_id(user_id, {'status': 'inactive'})
+        return self.update_by_id(user_id, {'is_active': False})
     
     def activate_user(self, user_id: str) -> bool:
         """
         Aktifkan user
         """
-        return self.update_by_id(user_id, {'status': 'active'})
+        return self.update_by_id(user_id, {'is_active': True})
     
     def get_users_by_role(self, role: str, limit: int = 50, skip: int = 0) -> List[Dict[str, Any]]:
         """

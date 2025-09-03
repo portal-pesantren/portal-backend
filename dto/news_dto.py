@@ -1,28 +1,32 @@
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
-from .base_dto import BaseResponseDTO, SearchDTO, FilterDTO
+from dto.base_dto import BaseResponseDTO, SearchDTO, FilterDTO
 
 class NewsCreateDTO(BaseModel):
-    """DTO untuk membuat berita baru"""
+    """DTO HANYA untuk membuat berita baru"""
+    # Kolom Wajib dari Pengguna
     title: str = Field(..., min_length=10, max_length=200, description="Judul berita")
     content: str = Field(..., min_length=100, description="Isi berita")
-    excerpt: Optional[str] = Field(None, max_length=500, description="Ringkasan berita")
     category: str = Field(..., description="Kategori berita")
-    tags: List[str] = Field(default=[], description="Tag berita")
+
+    # Kolom Opsional dari Pengguna (boleh dikosongkan)
+    excerpt: Optional[str] = Field(None, max_length=500, description="Ringkasan berita")
+    tags: List[str] = Field(default=[], description="Tag berita, maksimal 10")
     featured_image: Optional[str] = Field(None, description="URL gambar utama")
     images: List[str] = Field(default=[], description="URL gambar tambahan")
     pesantren_id: Optional[str] = Field(None, description="ID pesantren terkait")
-    is_featured: bool = Field(False, description="Berita unggulan")
-    publish_date: Optional[datetime] = Field(None, description="Tanggal publikasi")
-    meta_title: Optional[str] = Field(None, max_length=60, description="Meta title untuk SEO")
+    is_featured: bool = Field(False, description="Jadikan berita unggulan")
+    publish_date: Optional[datetime] = Field(None, description="Tanggal publikasi terjadwal")
+    meta_title: Optional[str] = Field(None, max_length=70, description="Meta title untuk SEO")
     meta_description: Optional[str] = Field(None, max_length=160, description="Meta description untuk SEO")
+
     
     @validator('category')
     def validate_category(cls, v):
         valid_categories = [
-            'pendidikan', 'kegiatan', 'prestasi', 'pengumuman', 
-            'tips', 'beasiswa', 'event', 'alumni', 'umum'
+            'berita', 'artikel', 'tips', 'panduan', 'event', 
+            'pengumuman', 'prestasi', 'kegiatan'
         ]
         if v not in valid_categories:
             raise ValueError(f'Kategori {v} tidak valid')
@@ -74,29 +78,32 @@ class NewsUpdateDTO(BaseModel):
         return v
 
 class NewsResponseDTO(BaseResponseDTO):
-    """DTO untuk response berita"""
-    title: str = Field(description="Judul berita")
-    slug: str = Field(description="Slug berita")
-    content: str = Field(description="Isi berita")
-    excerpt: str = Field(description="Ringkasan berita")
-    category: str = Field(description="Kategori berita")
-    tags: List[str] = Field(description="Tag berita")
-    featured_image: Optional[str] = Field(description="URL gambar utama")
-    images: List[str] = Field(description="URL gambar tambahan")
-    author_id: str = Field(description="ID penulis")
-    author_name: str = Field(description="Nama penulis")
-    author_avatar: Optional[str] = Field(description="Avatar penulis")
-    pesantren_id: Optional[str] = Field(description="ID pesantren terkait")
-    pesantren_name: Optional[str] = Field(description="Nama pesantren terkait")
-    is_published: bool = Field(description="Status publikasi")
-    is_featured: bool = Field(description="Berita unggulan")
-    publish_date: Optional[datetime] = Field(description="Tanggal publikasi")
-    views: int = Field(description="Jumlah views")
-    likes: int = Field(description="Jumlah likes")
-    dislikes: int = Field(description="Jumlah dislikes")
-    reading_time: int = Field(description="Estimasi waktu baca (menit)")
-    meta_title: Optional[str] = Field(description="Meta title untuk SEO")
-    meta_description: Optional[str] = Field(description="Meta description untuk SEO")
+    """DTO untuk response detail berita (HANYA INI YANG PERLU DIUBAH)"""
+    # Kolom yang kemungkinan besar selalu ada
+    title: str
+    slug: str
+    content: str
+    excerpt: str
+    category: str
+    tags: List[str]
+    images: List[str]
+    author_id: str
+    is_published: bool
+    is_featured: bool
+    views: int
+    likes: int
+    dislikes: int
+    reading_time: int
+    
+    # --- Kolom yang mungkin kosong (jadikan opsional) ---
+    featured_image: Optional[str] = None
+    author_name: Optional[str] = None
+    author_avatar: Optional[str] = None
+    pesantren_id: Optional[str] = None
+    pesantren_name: Optional[str] = None
+    publish_date: Optional[datetime] = None
+    meta_title: Optional[str] = None
+    meta_description: Optional[str] = None
     
 class NewsSummaryDTO(BaseModel):
     """DTO untuk summary berita (untuk list)"""
@@ -116,6 +123,7 @@ class NewsSummaryDTO(BaseModel):
     likes: int = Field(default=0, description="Jumlah likes")
     reading_time: int = Field(default=0, description="Estimasi waktu baca (menit)")
     created_at: datetime = Field(description="Tanggal dibuat")
+    author_name: Optional[str] = None 
 
 class NewsSearchDTO(SearchDTO):
     """DTO untuk pencarian berita"""
@@ -247,4 +255,8 @@ class NewsSEODTO(BaseModel):
     def validate_meta_keywords(cls, v):
         if v and len(v) > 10:
             raise ValueError('Maksimal 10 meta keywords')
-        return v
+        return 
+    
+class NewsFeatureDTO(BaseModel):
+    """DTO khusus untuk mengubah status featured berita"""
+    is_featured: bool = Field(..., description="Set berita sebagai unggulan (true) atau tidak (false)")

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from bson import ObjectId
-from pymongo.collection import Collection
+from pymongo.collection import Collection, ReturnDocument
 from pymongo.results import InsertOneResult, UpdateResult, DeleteResult
 from core.db import get_collection
 import logging
@@ -57,16 +57,13 @@ class BaseModel(ABC):
             raise
     
     def find_by_id(self, doc_id: Union[str, ObjectId]) -> Optional[Dict[str, Any]]:
-        """
-        Mencari dokumen berdasarkan ID
-        """
         try:
+            # Pindahkan logika konversi ke sini
             if isinstance(doc_id, str):
                 doc_id = ObjectId(doc_id)
             
             doc = self.collection.find_one({'_id': doc_id})
             return self._convert_object_id(doc) if doc else None
-            
         except Exception as e:
             logger.error(f"Error finding document by ID in {self.collection_name}: {str(e)}")
             return None
@@ -113,25 +110,53 @@ class BaseModel(ABC):
     
     def update_by_id(self, doc_id: Union[str, ObjectId], data: Dict[str, Any]) -> bool:
         """
-        Update dokumen berdasarkan ID
+        Update dokumen berdasarkan ID.
+        Fungsi ini sekarang bisa menangani operator ($inc, $push, dll.)
+        dan update biasa ($set) secara otomatis.
         """
         try:
             if isinstance(doc_id, str):
                 doc_id = ObjectId(doc_id)
             
-            # Tambahkan updated_at
-            data['updated_at'] = datetime.utcnow()
-            
+            # Jika data yang dikirim tidak mengandung operator (seperti '$inc'),
+            # maka kita bungkus dengan '$set' secara otomatis.
+            # Ini mencegah penggantian seluruh dokumen secara tidak sengaja.
+            if not any(key.startswith('$') for key in data):
+                update_instruction = {'$set': data}
+            else:
+                # Jika data sudah mengandung operator (seperti '$inc'), gunakan langsung.
+                update_instruction = data
+
+            # Selalu tambahkan updated_at ke dalam $set
+            if '$set' not in update_instruction:
+                update_instruction['$set'] = {}
+            update_instruction['$set']['updated_at'] = datetime.utcnow()
+
             result: UpdateResult = self.collection.update_one(
                 {'_id': doc_id},
-                {'$set': data}
+                update_instruction
             )
-            
             return result.modified_count > 0
-            
         except Exception as e:
-            logger.error(f"Error updating document in {self.collection_name}: {str(e)}")
+            # Log error yang spesifik dari MongoDB
+            logger.error(f"Error updating document in {self.collection_name}: {str(e)}, full error: {e.details if hasattr(e, 'details') else ''}")
             return False
+    
+    def find_one_and_update(self, filter: Dict[str, Any], update: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        try:
+            # Pindahkan logika konversi di sini juga
+            if '_id' in filter and isinstance(filter['_id'], str):
+                filter['_id'] = ObjectId(filter['_id'])
+
+            updated_doc = self.collection.find_one_and_update(
+                filter,
+                {'$set': update},
+                return_document=ReturnDocument.AFTER
+            )
+            return self._convert_object_id(updated_doc) if updated_doc else None
+        except Exception as e:
+            logger.error(f"Error finding and updating document in {self.collection_name}: {str(e)}")
+            return None
     
     def delete_by_id(self, doc_id: Union[str, ObjectId]) -> bool:
         """

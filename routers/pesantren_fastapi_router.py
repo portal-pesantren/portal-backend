@@ -72,7 +72,6 @@ async def get_pesantren_list(
                 "limit": str(limit),
                 "search": search,
                 "location": location,
-                "category": category,
                 "is_active": str(is_active) if is_active is not None else None
             }
         )

@@ -1,9 +1,10 @@
 from typing import Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 import os
 from dotenv import load_dotenv
 from core.exceptions import ValidationException
+import uuid
 
 load_dotenv()
 
@@ -19,25 +20,18 @@ class JWTService:
     def create_access_token(self, user_data: Dict[str, Any]) -> str:
         """
         Membuat access token JWT
-        
-        Args:
-            user_data: Data pengguna yang akan disimpan dalam token
-            
-        Returns:
-            str: JWT access token
         """
-        # Prepare payload
         payload = {
             "user_id": str(user_data.get("id") or user_data.get("_id")),
             "email": user_data.get("email"),
             "role": user_data.get("role"),
             "name": user_data.get("name"),
-            "exp": datetime.utcnow() + timedelta(minutes=self.access_token_expire_minutes),
-            "iat": datetime.utcnow(),
-            "type": "access"
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=self.access_token_expire_minutes),
+            "iat": datetime.now(timezone.utc),
+            "type": "access",
+            "jti": str(uuid.uuid4()) # <-- 2. Tambahkan ID unik untuk token
         }
         
-        # Create token
         token = jwt.encode(payload, self.secret_key, algorithm=self.algorithm)
         return token
     

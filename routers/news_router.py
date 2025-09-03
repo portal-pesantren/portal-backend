@@ -1,213 +1,163 @@
-from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query
-from services.news_service import NewsService
+# routers/news_router.py
+
+from typing import Any, List
+from fastapi import APIRouter, Depends, Query, Body, Path, status, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+
+# Ganti import ini dengan struktur proyek Anda
+from services.news_service import NewsService, NotFoundException
 from dto.news_dto import (
-    NewsCreateDTO, NewsUpdateDTO, NewsSearchDTO, 
-    NewsFilterDTO, NewsStatsDTO
+    NewsCreateDTO, NewsUpdateDTO, NewsSearchDTO, NewsFilterDTO, 
+    NewsResponseDTO, NewsSummaryDTO, NewsFeatureDTO
 )
-# Dependency untuk authentication (placeholder - sesuaikan dengan sistem auth yang ada)
-async def get_current_user(token: str = None):
-    # TODO: Implement actual authentication logic
-    # For now, return a mock user
-    return {"user_id": "mock_user_id", "role": "user"}
+from dto.base_dto import (
+    SuccessResponseDTO, PaginatedResponseDTO, ErrorResponseDTO, 
+    ValidationErrorResponseDTO, ValidationErrorDTO
+)
 
-async def get_current_admin_user(current_user: dict = Depends(get_current_user)):
-    if current_user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admin access required")
-    return current_user
-# from models.user import User  # Not needed with dict-based auth
-
-# Initialize router and service
-news_router = APIRouter(prefix="/news", tags=["news"])
 news_service = NewsService()
+news_router = APIRouter(
+    prefix="/news",
+    tags=["News Management"]
+)
 
-# GET /news - Get all news with pagination, search, and filters
-@news_router.get("/")
-def get_news_list(
+# --- Placeholder Autentikasi ---
+async def get_current_user():
+    return {"user_id": "mock_user_123", "role": "admin"}
+
+
+# --- Endpoint (Tidak ada perubahan di sini, semua sudah benar) ---
+
+@news_router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=SuccessResponseDTO[NewsResponseDTO]
+)
+def create_new_news(
+    news_data: NewsCreateDTO,  # <--- INI BAGIAN PALING PENTING! Pastikan ini NewsCreateDTO
+    current_user: dict = Depends(get_current_user)
+) -> Any:
+    author_id = current_user.get("user_id")
+    created_news = news_service.create_news(news_data, author_id)
+    return SuccessResponseDTO(
+        message="Berita berhasil dibuat.",
+        data=created_news
+    )
+
+@news_router.get(
+    "/",
+    response_model=SuccessResponseDTO[PaginatedResponseDTO[NewsSummaryDTO]]
+)
+def get_all_news(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1, le=100),
-    query: Optional[str] = Query(None),
-    sort_by: str = Query("published_at"),
-    sort_order: str = Query("desc"),
-    pesantren_id: Optional[str] = Query(None),
-    author_id: Optional[str] = Query(None),
-    category: Optional[str] = Query(None),
-    is_featured: Optional[bool] = Query(None),
-    is_published: Optional[bool] = Query(None),
-    published_from: Optional[str] = Query(None),
-    published_to: Optional[str] = Query(None)
-):
-    """Get all news with pagination, search, and filters"""
-    try:
-        # Create DTOs
-        search_dto = NewsSearchDTO(
-            query=query or "",
-            sort_by=sort_by,
-            sort_order=sort_order
-        )
-        
-        filter_dto = NewsFilterDTO(
-            pesantren_id=pesantren_id,
-            author_id=author_id,
-            category=category,
-            is_featured=is_featured,
-            is_published=is_published,
-            published_from=published_from,
-            published_to=published_to
-        )
-        
-        # Get news list
-        pagination_params = {
-            "page": page,
-            "limit": limit
-        }
-        
-        search_params = search_dto.dict() if search_dto else None
-        filter_params = filter_dto.dict() if filter_dto else None
-        
-        result = news_service.get_news_list(
-            search_params=search_params,
-            filter_params=filter_params,
-            pagination=pagination_params
-        )
-        
-        return {
-            "success": True,
-            "data": result.data,
-            "pagination": result.pagination,
-            "message": "Daftar berita berhasil diambil"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    query: str | None = Query(None),
+    sort_by: str = Query("date", enum=["date", "views", "likes", "title"]),
+    sort_order: str = Query("desc", enum=["asc", "desc"]),
+    category: str | None = Query(None),
+    is_featured: bool | None = Query(None),
+    is_published: bool | None = Query(True)
+) -> Any:
+    search_dto = NewsSearchDTO(query=query, sort_by=sort_by, sort_order=sort_order)
+    filter_dto = NewsFilterDTO(
+        category=category,
+        is_featured=is_featured,
+        is_published=is_published
+    )
+    paginated_result = news_service.get_news_list(page, limit, search_dto, filter_dto)
+    return SuccessResponseDTO(
+        message="Daftar berita berhasil diambil.",
+        data=paginated_result
+    )
 
-# GET /news/featured - Get featured news
-@news_router.get("/featured")
-def get_featured_news(limit: int = Query(10, ge=1, le=50)):
-    """Get featured news"""
-    try:
-        result = news_service.get_featured_news(limit=limit)
-        
-        return {
-            "success": True,
-            "data": result,
-            "message": "Berita unggulan berhasil diambil"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@news_router.get(
+    "/featured",
+    response_model=SuccessResponseDTO[List[NewsSummaryDTO]], # Response berupa list, bukan paginasi
+    summary="Get Featured News",
+    description="Mengambil daftar berita yang ditandai sebagai unggulan (is_featured=true)."
+)
+def get_featured_news(
+    limit: int = Query(5, ge=1, le=20, description="Jumlah berita yang ingin ditampilkan")
+) -> Any:
+    # Menggunakan DTO yang sudah ada untuk filtering dan searching
+    search_dto = NewsSearchDTO(sort_by="date", sort_order="desc") # Urutkan berdasarkan tanggal terbaru
+    filter_dto = NewsFilterDTO(
+        is_featured=True, # <-- Filter utama
+        is_published=True # <-- Pastikan hanya yang sudah terbit
+    )
+    
+    # Memanggil service list dengan pagination di-nonaktifkan (page=1, limit sesuai input)
+    paginated_result = news_service.get_news_list(1, limit, search_dto, filter_dto)
+    
+    return SuccessResponseDTO(
+        message="Daftar berita unggulan berhasil diambil.",
+        data=paginated_result.data # Hanya kembalikan list datanya
+    )
 
-# GET /news/popular - Get popular news
-@news_router.get("/popular")
-def get_popular_news(limit: int = Query(10, ge=1, le=50)):
-    """Get popular news"""
-    try:
-        result = news_service.get_popular_news(limit=limit)
-        
-        return {
-            "success": True,
-            "data": result,
-            "message": "Berita populer berhasil diambil"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@news_router.get(
+    "/{identifier}",
+    response_model=SuccessResponseDTO[NewsResponseDTO]
+)
+def get_single_news(identifier: str = Path(..., description="ID atau slug dari berita")) -> Any:
+    news = news_service.get_news_by_id_or_slug(identifier)
+    return SuccessResponseDTO(
+        message="Detail berita berhasil diambil.",
+        data=news
+    )
 
-# GET /news/stats - Get news statistics
-@news_router.get("/stats")
-def get_news_stats(current_user: dict = Depends(get_current_user)):
-    """Get news statistics"""
-    try:
-        result = news_service.get_news_stats()
-        
-        return {
-            "success": True,
-            "data": result,
-            "message": "Statistik berita berhasil diambil"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# GET /news/{news_id} - Get news by ID
-@news_router.get("/{news_id}")
-def get_news_by_id(news_id: str):
-    """Get news by ID"""
-    try:
-        result = news_service.get_news_by_id(news_id)
-        
-        if not result:
-            raise HTTPException(status_code=404, detail="Berita tidak ditemukan")
-        
-        # Check if result is an error response
-        if hasattr(result, 'success') and not result.success:
-            raise HTTPException(status_code=404, detail=result.error)
-        
-        return {
-            "success": True,
-            "data": result.data,
-            "message": "Detail berita berhasil diambil"
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# POST /news - Create new news
-@news_router.post("/")
-def create_news(
-    news_data: NewsCreateDTO,
-    current_user: dict = Depends(get_current_admin_user)
-):
-    """Create new news"""
-    try:
-        result = news_service.create_news(news_data, current_user.id)
-        
-        return {
-            "success": True,
-            "data": result,
-            "message": "Berita berhasil dibuat"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# PUT /news/{news_id} - Update news
-@news_router.put("/{news_id}")
-def update_news(
+@news_router.put(
+    "/{news_id}",
+    response_model=SuccessResponseDTO[NewsResponseDTO]
+)
+def update_existing_news(
     news_id: str,
     news_data: NewsUpdateDTO,
-    current_user: dict = Depends(get_current_admin_user)
-):
-    """Update news"""
-    try:
-        result = news_service.update_news(news_id, news_data, current_user.get("user_id"))
-        
-        return {
-            "success": True,
-            "data": result,
-            "message": "Berita berhasil diperbarui"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    current_user: dict = Depends(get_current_user)
+) -> Any:
+    user_id = current_user.get("user_id")
+    updated_news = news_service.update_news(news_id, news_data, user_id)
+    return SuccessResponseDTO(
+        message="Berita berhasil diperbarui.",
+        data=updated_news
+    )
 
-# DELETE /news/{news_id} - Delete news
-@news_router.delete("/{news_id}")
-def delete_news(
+@news_router.delete(
+    "/{news_id}",
+    response_model=SuccessResponseDTO,
+    status_code=status.HTTP_200_OK
+)
+def delete_single_news(
     news_id: str,
-    current_user: dict = Depends(get_current_admin_user)
-):
-    """Delete news"""
-    try:
-        result = news_service.delete_news(news_id, current_user.id)
-        
-        return {
-            "success": True,
-            "data": result,
-            "message": "Berita berhasil dihapus"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    current_user: dict = Depends(get_current_user)
+) -> Any:
+    user_id = current_user.get("user_id")
+    news_service.delete_news(news_id, user_id)
+    return SuccessResponseDTO(
+        message="Berita berhasil dihapus."
+    )
+
+@news_router.patch(
+    "/{news_id}/featured",
+    response_model=SuccessResponseDTO[NewsResponseDTO],
+    summary="Update Status Unggulan Berita",
+    description="Endpoint khusus untuk mengubah status `is_featured` sebuah berita menjadi `true` atau `false`."
+)
+def feature_single_news(
+    news_id: str = Path(..., description="ID dari berita yang akan diubah"),
+    feature_data: NewsFeatureDTO = Body(...),
+    current_user: dict = Depends(get_current_user)
+) -> Any:
+    """
+    Mengubah status unggulan sebuah berita.
+    - Kirim `{"is_featured": true}` untuk menjadikan berita sebagai unggulan.
+    - Kirim `{"is_featured": false}` untuk menghapus status unggulan.
+    """
+    user_id = current_user.get("user_id")
+    featured_news = news_service.feature_news(news_id, feature_data, user_id)
+    
+    status_text = "dijadikan" if feature_data.is_featured else "dihapus dari"
+    return SuccessResponseDTO(
+        message=f"Berita berhasil {status_text} unggulan.",
+        data=featured_news
+    )
